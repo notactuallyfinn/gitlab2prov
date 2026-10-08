@@ -5,7 +5,6 @@ from prov.model import PROV_LABEL
 from prov.model import PROV_ROLE
 from prov.model import PROV_TYPE
 
-
 PROV_FIELD_MAP = {
     "prov_type": PROV_TYPE,
     "prov_role": PROV_ROLE,
@@ -57,7 +56,6 @@ class ProvRole:
     DELETED_REVISION = "DeletedRevision"
     MODIFIED_REVISION = "ModifiedRevision"
     PREVIOUS_REVISION = "PreviousRevision"
-    
 
 
 class ProvType:

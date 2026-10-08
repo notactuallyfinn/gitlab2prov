@@ -25,7 +25,6 @@ from prov.model import (
     PROV_REC_CLS,
 )
 
-
 log = logging.getLogger(__name__)
 
 

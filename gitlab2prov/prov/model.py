@@ -37,7 +37,6 @@ from gitlab2prov.domain.objects import (
     AnnotatedVersion,
 )
 
-
 AUTHOR_ROLE_MAP = {
     Commit: ProvRole.COMMIT_AUTHOR,
     Issue: ProvRole.ISSUE_AUTHOR,
@@ -79,7 +78,7 @@ HostedMergeQuery = partial(hosted_resource_query, resource_type=MergeRequest)
 class ProvenanceContext:
     document: ProvDocument
     namespace: Optional[str] = None
-    
+
     def add_element(self, dataclass_instance) -> ProvRecord:
         # Convert the dataclass instance to a ProvElement
         element = self.convert_to_prov_element(dataclass_instance)
@@ -121,7 +120,7 @@ class ProvenanceContext:
         relationship.add_attributes(attributes)
         # Add the relationship to the ProvDocument
         self.document.add_record(relationship)
-   
+
 
 @dataclass
 class FileAdditionModel:
@@ -185,7 +184,6 @@ class FileAdditionModel:
         self.ctx.add_relation(self.revision, self.revision.file, ProvSpecialization)
         # Return the document
         return self.ctx.document
- 
 
 
 @dataclass

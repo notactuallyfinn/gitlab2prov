@@ -21,7 +21,6 @@ from prov.identifier import QualifiedName
 from gitlab2prov.domain.constants import ProvType
 from gitlab2prov.prov.operations import qualified_name
 
-
 PLACEHOLDER = ProvDocument()
 PLACEHOLDER.set_default_namespace("http://github.com/dlr-sc/gitlab2prov/")
 

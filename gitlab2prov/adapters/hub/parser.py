@@ -153,15 +153,17 @@ class GithubAnnotationParser:
             body=event.event,
             start=event.created_at,
             end=event.created_at,
-            annotator=User(
-                name=event.actor.name,
-                email=event.actor.email,
-                github_username=event.actor.login,
-                github_id=event.actor.id,
-                prov_role=ProvRole.ANNOTATOR,
-            )
-            if event.actor
-            else None,
+            annotator=(
+                User(
+                    name=event.actor.name,
+                    email=event.actor.email,
+                    github_username=event.actor.login,
+                    github_id=event.actor.id,
+                    prov_role=ProvRole.ANNOTATOR,
+                )
+                if event.actor
+                else None
+            ),
         )
 
     def parse_pull_request_review(self, review: PullRequestReview) -> Annotation:

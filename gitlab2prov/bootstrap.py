@@ -8,7 +8,6 @@ from gitlab2prov.adapters.lab import GitlabFetcher
 from gitlab2prov.adapters.hub import GithubFetcher
 from gitlab2prov.adapters.project_url import GithubProjectUrl, GitlabProjectUrl
 
-
 log = logging.getLogger(__name__)
 
 

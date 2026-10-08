@@ -19,7 +19,6 @@ from gitlab2prov.adapters.lab.classifiers import SystemNoteClassifier
 from gitlab2prov.domain.objects import Annotation, User
 from gitlab2prov.domain.constants import ProvRole
 
-
 A = TypeVar("A")
 
 log = logging.getLogger(__name__)
@@ -44,7 +43,12 @@ class GitlabAnnotationParser:
                 return self.parse_comment
             case ProjectIssueResourceLabelEvent() | ProjectMergeRequestResourceLabelEvent():
                 return self.parse_label
-            case ProjectIssueAwardEmoji() | ProjectIssueNoteAwardEmoji() | ProjectMergeRequestAwardEmoji() | ProjectMergeRequestNoteAwardEmoji():
+            case (
+                ProjectIssueAwardEmoji()
+                | ProjectIssueNoteAwardEmoji()
+                | ProjectMergeRequestAwardEmoji()
+                | ProjectMergeRequestNoteAwardEmoji()
+            ):
                 return self.parse_award
             case _:
                 log.warning(f"no parser found for {raw_annotation=}")
@@ -112,10 +116,12 @@ class GitlabAnnotationParser:
 
     def parse_award(
         self,
-        award: ProjectIssueAwardEmoji
-        | ProjectIssueNoteAwardEmoji
-        | ProjectMergeRequestAwardEmoji
-        | ProjectMergeRequestNoteAwardEmoji,
+        award: (
+            ProjectIssueAwardEmoji
+            | ProjectIssueNoteAwardEmoji
+            | ProjectMergeRequestAwardEmoji
+            | ProjectMergeRequestNoteAwardEmoji
+        ),
     ) -> Annotation:
         annotator = User(
             name=award.user.get("name"),

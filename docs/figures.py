@@ -10,7 +10,6 @@ __status__ = "Stable"
 from prov.model import ProvDocument
 from prov.dot import prov_to_dot
 
-
 add = ProvDocument()
 add.set_default_namespace("gitlab2prov:")
 add.activity("Commit")
@@ -174,15 +173,11 @@ for title, doc in [
     ("gitlab_commit_model", com),
     ("gitlab_issue_model", iss),
     ("gitlab_merge_request_model", mr),
-    ("gitlab_release_tag_model", release_tag_model)
+    ("gitlab_release_tag_model", release_tag_model),
 ]:
     dot = prov_to_dot(doc, show_nary=False, use_labels=False, direction="BT")
     dot.set_graph_defaults(bgcolor="transparent")
-    dot.write_pdf(
-        f"./pdfs/{title}.pdf"
-    )
+    dot.write_pdf(f"./pdfs/{title}.pdf")
     dot = prov_to_dot(doc, show_nary=False, use_labels=False, direction="BT")
     dot.set_graph_defaults(bgcolor="transparent")
-    dot.write_svg(
-        f"./svgs/{title}.svg"
-    )
+    dot.write_svg(f"./svgs/{title}.svg")

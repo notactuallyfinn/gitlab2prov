@@ -19,7 +19,6 @@ from gitlab2prov.domain.objects import (
     Release,
 )
 
-
 log = logging.getLogger(__name__)
 
 

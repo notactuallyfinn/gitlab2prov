@@ -4,7 +4,6 @@ from gitlab2prov.adapters.repository import InMemoryRepository
 
 class TestInMemoryRepository:
 
-
     def test_add_resource(self, random_user):
         repo = InMemoryRepository()
         resource = random_user
@@ -87,7 +86,9 @@ class TestInMemoryRepository:
         retrieved_resources = repo.list_all(type(resource1), name="...", email="...")
         assert len(retrieved_resources) == 0
 
-    def test_list_all_resources_throws_attribute_error_for_non_existing_attributes(self, random_user):
+    def test_list_all_resources_throws_attribute_error_for_non_existing_attributes(
+        self, random_user
+    ):
         repo = InMemoryRepository()
         resource1 = random_user
         repo.add(resource1)

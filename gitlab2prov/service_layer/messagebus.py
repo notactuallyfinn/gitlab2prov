@@ -7,7 +7,6 @@ from prov.model import ProvDocument
 from gitlab2prov.domain.commands import Command
 from gitlab2prov.service_layer.unit_of_work import UnitOfWork
 
-
 logger = logging.getLogger(__name__)
 
 

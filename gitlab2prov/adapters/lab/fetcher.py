@@ -21,7 +21,6 @@ from gitlab2prov.domain.objects import (
     GitTag,
 )
 
-
 log = logging.getLogger(__name__)
 
 
