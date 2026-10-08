@@ -1,22 +1,20 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from dataclasses import field
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
-from prov.model import (
-    PROV_LABEL,
-    PROV_ROLE,
-    ProvDocument,
-    ProvAgent,
-    ProvActivity,
-    ProvEntity,
-    PROV_TYPE,
-    PROV_ATTR_STARTTIME,
-    PROV_ATTR_ENDTIME,
-)
 from prov.identifier import QualifiedName
+from prov.model import (
+    PROV_ATTR_ENDTIME,
+    PROV_ATTR_STARTTIME,
+    PROV_ROLE,
+    PROV_TYPE,
+    ProvActivity,
+    ProvAgent,
+    ProvDocument,
+    ProvEntity,
+)
 
 from gitlab2prov.domain.constants import ProvType
 from gitlab2prov.prov.operations import qualified_name

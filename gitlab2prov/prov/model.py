@@ -1,40 +1,40 @@
-from typing import Optional, Union, Type, Iterable, Callable, Any
 from dataclasses import dataclass, field
+from functools import partial
 from operator import attrgetter
+from typing import Any, Callable, Iterable, Optional, Type, Union
 
+from prov.identifier import Namespace, QualifiedName
 from prov.model import (
-    ProvDocument,
-    ProvDerivation,
-    PROV_ROLE,
     PROV_ATTR_STARTTIME,
-    ProvInvalidation,
-    ProvMembership,
-    ProvElement,
-    ProvUsage,
+    PROV_ROLE,
     ProvAssociation,
     ProvAttribution,
-    ProvGeneration,
-    ProvSpecialization,
     ProvCommunication,
-    ProvRelation,
+    ProvDerivation,
+    ProvDocument,
+    ProvElement,
+    ProvGeneration,
+    ProvInvalidation,
+    ProvMembership,
     ProvRecord,
+    ProvRelation,
+    ProvSpecialization,
+    ProvUsage,
 )
-from prov.identifier import QualifiedName, Namespace
-from functools import partial
 
 from gitlab2prov.adapters.repository import Repository
 from gitlab2prov.domain.constants import ProvRole
 from gitlab2prov.domain.objects import (
+    AnnotatedVersion,
+    Annotation,
+    Commit,
+    Creation,
     FileRevision,
     GitCommit,
-    Commit,
+    GitTag,
     Issue,
     MergeRequest,
     Release,
-    GitTag,
-    Annotation,
-    Creation,
-    AnnotatedVersion,
 )
 
 AUTHOR_ROLE_MAP = {

@@ -1,23 +1,23 @@
 import logging
 import uuid
 from dataclasses import dataclass
-from typing import TypeVar, Callable
+from typing import Callable, TypeVar
 
 from gitlab.v4.objects import (
-    ProjectIssueNote,
-    ProjectMergeRequestNote,
     ProjectCommitComment,
-    ProjectIssueResourceLabelEvent,
-    ProjectMergeRequestResourceLabelEvent,
     ProjectIssueAwardEmoji,
+    ProjectIssueNote,
     ProjectIssueNoteAwardEmoji,
+    ProjectIssueResourceLabelEvent,
     ProjectMergeRequestAwardEmoji,
+    ProjectMergeRequestNote,
     ProjectMergeRequestNoteAwardEmoji,
+    ProjectMergeRequestResourceLabelEvent,
 )
 
 from gitlab2prov.adapters.lab.classifiers import SystemNoteClassifier
-from gitlab2prov.domain.objects import Annotation, User
 from gitlab2prov.domain.constants import ProvRole
+from gitlab2prov.domain.objects import Annotation, User
 
 A = TypeVar("A")
 

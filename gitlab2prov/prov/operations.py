@@ -1,29 +1,27 @@
-import json
-import sys
-import logging
 import hashlib
-from typing import NamedTuple, Type
-
-from collections import defaultdict, Counter
+import json
+import logging
+import sys
+from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Optional, Sequence, Any
+from typing import Any, NamedTuple, Optional, Sequence, Type
 from urllib.parse import urlencode
 
-from ruamel.yaml import YAML
 from prov.dot import prov_to_dot
 from prov.identifier import QualifiedName
 from prov.model import (
-    ProvDocument,
-    ProvRecord,
-    ProvElement,
-    ProvRelation,
-    ProvAgent,
-    ProvEntity,
-    ProvActivity,
+    PROV_REC_CLS,
     PROV_ROLE,
     PROV_TYPE,
-    PROV_REC_CLS,
+    ProvActivity,
+    ProvAgent,
+    ProvDocument,
+    ProvElement,
+    ProvEntity,
+    ProvRecord,
+    ProvRelation,
 )
+from ruamel.yaml import YAML
 
 log = logging.getLogger(__name__)
 

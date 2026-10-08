@@ -1,14 +1,11 @@
-from functools import partial
-from functools import update_wrapper
-from functools import wraps
+from functools import partial, update_wrapper, wraps
 from typing import Iterator
-from prov.model import ProvDocument
 
 import click
 import git
+from prov.model import ProvDocument
 
-from gitlab2prov import __version__
-from gitlab2prov import bootstrap
+from gitlab2prov import __version__, bootstrap
 from gitlab2prov.config import Config
 from gitlab2prov.domain import commands
 from gitlab2prov.log import create_logger

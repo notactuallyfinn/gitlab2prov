@@ -1,8 +1,6 @@
 import logging
 import re
-from dataclasses import dataclass
-from dataclasses import field
-from dataclasses import InitVar
+from dataclasses import InitVar, dataclass, field
 from typing import Any
 
 log = logging.getLogger(__name__)

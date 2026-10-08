@@ -1,22 +1,22 @@
-import logging
 import itertools
+import logging
+from dataclasses import InitVar, dataclass, field
 from typing import Iterator
-from dataclasses import dataclass, field, InitVar
 
 from github import Github
 from github.Repository import Repository
 
-from gitlab2prov.adapters.project_url import GithubProjectUrl
 from gitlab2prov.adapters.hub.parser import GithubAnnotationParser
+from gitlab2prov.adapters.project_url import GithubProjectUrl
 from gitlab2prov.domain.constants import ProvRole
 from gitlab2prov.domain.objects import (
     Asset,
-    User,
     Commit,
+    GitTag,
     Issue,
     MergeRequest,
-    GitTag,
     Release,
+    User,
 )
 
 log = logging.getLogger(__name__)

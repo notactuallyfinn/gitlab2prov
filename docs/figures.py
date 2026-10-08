@@ -7,8 +7,8 @@ __version__ = "1.0"
 __status__ = "Stable"
 
 
-from prov.model import ProvDocument
 from prov.dot import prov_to_dot
+from prov.model import ProvDocument
 
 add = ProvDocument()
 add.set_default_namespace("gitlab2prov:")

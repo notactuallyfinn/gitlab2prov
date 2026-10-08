@@ -1,5 +1,6 @@
 import random
 import string
+
 import pytest
 
 from gitlab2prov.domain.objects import User

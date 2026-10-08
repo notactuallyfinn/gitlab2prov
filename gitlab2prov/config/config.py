@@ -1,11 +1,11 @@
 import json
-from typing import Any
 from dataclasses import dataclass, field
+from typing import Any
 
 import jsonschema
 import jsonschema.exceptions
-from ruamel.yaml import YAML
 import ruamel.yaml.constructor as constructor
+from ruamel.yaml import YAML
 
 from gitlab2prov.root import get_package_root
 

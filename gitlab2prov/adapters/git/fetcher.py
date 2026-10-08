@@ -1,19 +1,14 @@
 from collections.abc import Iterator
 from dataclasses import dataclass
 from itertools import zip_longest
-from tempfile import TemporaryDirectory
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
-from git import Commit
-from git import Repo
+from git import Commit, Repo
 
 from gitlab2prov.adapters.project_url import ProjectUrl
-from gitlab2prov.domain.constants import ChangeType
-from gitlab2prov.domain.constants import ProvRole
-from gitlab2prov.domain.objects import File
-from gitlab2prov.domain.objects import FileRevision
-from gitlab2prov.domain.objects import GitCommit
-from gitlab2prov.domain.objects import User
+from gitlab2prov.domain.constants import ChangeType, ProvRole
+from gitlab2prov.domain.objects import File, FileRevision, GitCommit, User
 
 EMPTY_TREE_SHA = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 

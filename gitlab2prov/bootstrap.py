@@ -1,12 +1,11 @@
 import inspect
 import logging
 
-from gitlab2prov.service_layer import handlers, messagebus, unit_of_work
-
 from gitlab2prov.adapters.git import GitFetcher
-from gitlab2prov.adapters.lab import GitlabFetcher
 from gitlab2prov.adapters.hub import GithubFetcher
+from gitlab2prov.adapters.lab import GitlabFetcher
 from gitlab2prov.adapters.project_url import GithubProjectUrl, GitlabProjectUrl
+from gitlab2prov.service_layer import handlers, messagebus, unit_of_work
 
 log = logging.getLogger(__name__)
 

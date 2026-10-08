@@ -1,7 +1,7 @@
-import logging
 import itertools
+import logging
+from dataclasses import InitVar, dataclass, field
 from typing import Iterator
-from dataclasses import dataclass, field, InitVar
 
 from gitlab import Gitlab
 from gitlab.exceptions import GitlabListError
@@ -12,13 +12,13 @@ from gitlab2prov.adapters.project_url import GitlabProjectUrl
 from gitlab2prov.domain.constants import ProvRole
 from gitlab2prov.domain.objects import (
     Asset,
-    Evidence,
     Commit,
+    Evidence,
+    GitTag,
     Issue,
     MergeRequest,
     Release,
     User,
-    GitTag,
 )
 
 log = logging.getLogger(__name__)

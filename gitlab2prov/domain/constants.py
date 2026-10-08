@@ -1,9 +1,11 @@
 from prov.constants import PROV_ATTR_COLLECTION
-from prov.model import PROV_ATTR_ENDTIME
-from prov.model import PROV_ATTR_STARTTIME
-from prov.model import PROV_LABEL
-from prov.model import PROV_ROLE
-from prov.model import PROV_TYPE
+from prov.model import (
+    PROV_ATTR_ENDTIME,
+    PROV_ATTR_STARTTIME,
+    PROV_LABEL,
+    PROV_ROLE,
+    PROV_TYPE,
+)
 
 PROV_FIELD_MAP = {
     "prov_type": PROV_TYPE,

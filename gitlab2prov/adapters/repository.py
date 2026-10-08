@@ -1,6 +1,6 @@
 import abc
 from collections import defaultdict
-from typing import Type, TypeVar, Optional, Any
+from typing import Any, Optional, Type, TypeVar
 
 R = TypeVar("R")
 

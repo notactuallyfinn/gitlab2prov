@@ -1,5 +1,5 @@
-from urllib.parse import urlsplit
 from dataclasses import dataclass
+from urllib.parse import urlsplit
 
 
 @dataclass

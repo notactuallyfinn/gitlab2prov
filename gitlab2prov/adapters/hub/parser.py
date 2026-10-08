@@ -1,18 +1,18 @@
 import logging
 from dataclasses import dataclass
-from typing import TypeVar, Callable
+from typing import Callable, TypeVar
 
 from github.CommitComment import CommitComment
 from github.CommitStatus import CommitStatus
-from github.Reaction import Reaction
 from github.IssueComment import IssueComment
 from github.IssueEvent import IssueEvent
-from github.TimelineEvent import TimelineEvent
 from github.PullRequestComment import PullRequestComment
 from github.PullRequestReview import PullRequestReview
+from github.Reaction import Reaction
+from github.TimelineEvent import TimelineEvent
 
-from gitlab2prov.domain.objects import Annotation, User
 from gitlab2prov.domain.constants import ProvRole
+from gitlab2prov.domain.objects import Annotation, User
 
 A = TypeVar("A")
 

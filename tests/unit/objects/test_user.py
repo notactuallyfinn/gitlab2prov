@@ -1,5 +1,5 @@
-from gitlab2prov.domain.objects import User
 from gitlab2prov.domain.constants import ProvType
+from gitlab2prov.domain.objects import User
 
 
 class TestUser:

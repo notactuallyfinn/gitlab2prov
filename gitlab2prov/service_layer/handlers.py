@@ -1,8 +1,9 @@
 import logging
 
+from prov.model import ProvDocument
+
 from gitlab2prov.domain import commands
 from gitlab2prov.prov import model, operations
-from prov.model import ProvDocument
 
 log = logging.getLogger(__name__)
 
