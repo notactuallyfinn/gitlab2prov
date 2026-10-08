@@ -7,7 +7,7 @@ class TestInMemoryRepository:
 
     def test_add_resource(self, random_user):
         repo = InMemoryRepository()
-        resource = random_user 
+        resource = random_user
         repo.add(resource)
         assert len(repo.repo[type(resource)]) == 1
         assert repo.repo[type(resource)][0] == resource
@@ -64,7 +64,7 @@ class TestInMemoryRepository:
         assert resource1 in retrieved_resources
         assert resource2 in retrieved_resources
 
-    pytest.mark.fixt_data(2)
+    @pytest.mark.fixt_data(2)
     def test_list_all_resources_with_filters_existing(self, n_random_users):
         repo = InMemoryRepository()
         resource1 = n_random_users[0]

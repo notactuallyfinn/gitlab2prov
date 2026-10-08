@@ -42,7 +42,7 @@ class User:
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"User?{self.name=}&{self.email=}")
+        return qualified_name(f"User?name={self.name}&email={self.email}")
 
     def to_prov_element(self) -> ProvAgent:
         attributes = [
@@ -70,10 +70,16 @@ class File:
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"File?{self.name=}&{self.path=}&{self.commit=}")
+        return qualified_name(f"File?name={self.name}&path={self.path}&commit={self.commit}")
 
     def to_prov_element(self) -> ProvEntity:
-        attributes = [("name", self.name), ("path", self.path), (PROV_TYPE, ProvType.FILE)]
+        print(ProvEntity.__module__)
+        attributes = [
+            ("name", self.name),
+            ("path", self.path),
+            ("commit", self.commit),
+            (PROV_TYPE, ProvType.FILE),
+        ]
         return ProvEntity(
             PLACEHOLDER,
             self.identifier,

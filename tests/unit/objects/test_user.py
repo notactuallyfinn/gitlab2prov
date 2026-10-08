@@ -51,12 +51,14 @@ class TestUser:
         # Test to_prov_element() method with minimum attributes
         user = User(name="John Doe", email="johndoe@example.com")
         prov_element = user.to_prov_element()
-        assert prov_element.identifier == "User?name=John Doe&email=johndoe@example.com"
-        assert prov_element.attributes == [
-            ("name", "John Doe"),
+        assert prov_element.identifier.localpart == "User?name=John Doe&email=johndoe@example.com"
+        assert sorted(
+            [(name.localpart, val) for name, val in prov_element.attributes],
+            key=lambda node: node[0],
+        ) == [
             ("email", "johndoe@example.com"),
-            ("prov_role", None),
-            ("prov_type", ProvType.USER),
+            ("name", "John Doe"),
+            ("type", ProvType.USER),
         ]
 
         # Test to_prov_element() method with all attributes
@@ -70,14 +72,19 @@ class TestUser:
             prov_role="developer",
         )
         prov_element = user.to_prov_element()
-        assert prov_element.identifier == "User?name=Jane Smith&email=janesmith@example.com"
-        assert prov_element.attributes == [
-            ("name", "Jane Smith"),
+        assert (
+            prov_element.identifier.localpart == "User?name=Jane Smith&email=janesmith@example.com"
+        )
+        assert sorted(
+            [(name.localpart, val) for name, val in prov_element.attributes],
+            key=lambda node: node[0],
+        ) == [
             ("email", "janesmith@example.com"),
-            ("gitlab_username", "janesmith"),
+            ("github_id", "456"),
             ("github_username", "janesmith"),
             ("gitlab_id", "123"),
-            ("github_id", "456"),
-            ("prov_role", "developer"),
-            ("prov_type", ProvType.USER),
+            ("gitlab_username", "janesmith"),
+            ("name", "Jane Smith"),
+            ("role", "developer"),
+            ("type", ProvType.USER),
         ]
