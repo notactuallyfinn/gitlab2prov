@@ -117,9 +117,7 @@ def extract_files(repo: Repo) -> Iterator[File]:
         # disregard modifications and deletions
         for diff_item in diff.iter_change_type(ChangeType.ADDED):
             # path for new files is stored in diff b_path
-            yield File(
-                name=Path(diff_item.b_path).name, path=diff_item.b_path, commit=commit.hexsha
-            )
+            yield File(name=Path(diff_item.b_path).name, path=diff_item.b_path, commit=commit.hexsha)
 
 
 def extract_revisions(repo: Repo) -> Iterator[FileRevision]:

@@ -94,9 +94,7 @@ class GithubFetcher:
             raw_annotations.extend(pull.get_comments())
             raw_annotations.extend(comment.get_reactions() for comment in pull.get_comments())
             raw_annotations.extend(pull.get_review_comments())
-            raw_annotations.extend(
-                comment.get_reactions() for comment in pull.get_review_comments()
-            )
+            raw_annotations.extend(comment.get_reactions() for comment in pull.get_review_comments())
             raw_annotations.extend(pull.get_reviews())
             raw_annotations.extend(pull.as_issue().get_reactions())
             raw_annotations.extend(pull.as_issue().get_events())
@@ -134,10 +132,7 @@ class GithubFetcher:
                     email=release.author.email,
                     prov_role=ProvRole.RELEASE_AUTHOR,
                 ),
-                assets=[
-                    Asset(url=asset.url, format=asset.content_type)
-                    for asset in release.get_assets()
-                ],
+                assets=[Asset(url=asset.url, format=asset.content_type) for asset in release.get_assets()],
                 evidences=[],
                 created_at=release.created_at,
                 released_at=release.published_at,

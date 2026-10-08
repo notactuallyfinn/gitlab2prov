@@ -70,9 +70,7 @@ class TestInMemoryRepository:
         resource2 = n_random_users[1]
         repo.add(resource1)
         repo.add(resource2)
-        retrieved_resources = repo.list_all(
-            type(resource1), name=resource1.name, email=resource1.email
-        )
+        retrieved_resources = repo.list_all(type(resource1), name=resource1.name, email=resource1.email)
         assert len(retrieved_resources) == 1
         assert resource1 in retrieved_resources
 
@@ -86,9 +84,7 @@ class TestInMemoryRepository:
         retrieved_resources = repo.list_all(type(resource1), name="...", email="...")
         assert len(retrieved_resources) == 0
 
-    def test_list_all_resources_throws_attribute_error_for_non_existing_attributes(
-        self, random_user
-    ):
+    def test_list_all_resources_throws_attribute_error_for_non_existing_attributes(self, random_user):
         repo = InMemoryRepository()
         resource1 = random_user
         repo.add(resource1)

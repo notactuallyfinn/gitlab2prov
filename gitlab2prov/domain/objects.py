@@ -98,9 +98,7 @@ class FileRevision(File):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(
-            f"FileRevision?{self.name=}&{self.path=}&{self.commit=}&{self.status=}"
-        )
+        return qualified_name(f"FileRevision?{self.name=}&{self.path=}&{self.commit=}&{self.status=}")
 
     def to_prov_element(self) -> ProvEntity:
         attributes = [
@@ -195,9 +193,7 @@ class AnnotatedVersion:
 
     @classmethod
     def from_issue(cls, issue: Issue, annotation: Annotation):
-        return cls(
-            id=issue.id, annotation=annotation.id, resource=ProvType.ISSUE, start=annotation.start
-        )
+        return cls(id=issue.id, annotation=annotation.id, resource=ProvType.ISSUE, start=annotation.start)
 
     @classmethod
     def from_merge_request(cls, merge_request: MergeRequest, annotation: Annotation):
@@ -243,9 +239,7 @@ class Creation:
 
     @classmethod
     def from_issue(cls, issue: Issue):
-        return cls(
-            id=issue.id, resource=ProvType.ISSUE, start=issue.created_at, end=issue.closed_at
-        )
+        return cls(id=issue.id, resource=ProvType.ISSUE, start=issue.created_at, end=issue.closed_at)
 
     @classmethod
     def from_merge_request(cls, merge_request: MergeRequest):
@@ -416,10 +410,7 @@ class MergeRequest:
 
     @property
     def annotated_versions(self) -> list[AnnotatedVersion]:
-        return [
-            AnnotatedVersion.from_merge_request(self, annotation)
-            for annotation in self.annotations
-        ]
+        return [AnnotatedVersion.from_merge_request(self, annotation) for annotation in self.annotations]
 
     def to_prov_element(self) -> ProvActivity:
         attributes = [

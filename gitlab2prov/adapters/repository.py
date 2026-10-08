@@ -51,7 +51,5 @@ class InMemoryRepository(Repository):
 
     def _list_all(self, resource_type: Type[R], **filters: Any) -> list[R]:
         return [
-            r
-            for r in self.repo.get(resource_type, [])
-            if all(getattr(r, key) == val for key, val in filters.items())
+            r for r in self.repo.get(resource_type, []) if all(getattr(r, key) == val for key, val in filters.items())
         ]

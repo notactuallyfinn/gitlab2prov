@@ -35,9 +35,7 @@ def bootstrap(
 
 def inject_dependencies(handler, dependencies):
     params = inspect.signature(handler).parameters
-    dependencies = {
-        name: dependency for name, dependency in dependencies.items() if name in params
-    }
+    dependencies = {name: dependency for name, dependency in dependencies.items() if name in params}
     for name, dep in dependencies.items():
         log.debug(f"inject dependency {dep} into handler {handler} as param {name}")
     return lambda cmd: handler(cmd, **dependencies)

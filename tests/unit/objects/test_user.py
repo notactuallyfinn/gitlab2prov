@@ -72,9 +72,7 @@ class TestUser:
             prov_role="developer",
         )
         prov_element = user.to_prov_element()
-        assert (
-            prov_element.identifier.localpart == "User?name=Jane Smith&email=janesmith@example.com"
-        )
+        assert prov_element.identifier.localpart == "User?name=Jane Smith&email=janesmith@example.com"
         assert sorted(
             [(name.localpart, val) for name, val in prov_element.attributes],
             key=lambda node: node[0],

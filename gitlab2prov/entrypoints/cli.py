@@ -192,9 +192,7 @@ def process_commands(processors, **kwargs):
 
 
 @click.command()
-@click.option(
-    "-u", "--url", "urls", multiple=True, type=str, required=True, help="Project url[s]."
-)
+@click.option("-u", "--url", "urls", multiple=True, type=str, required=True, help="Project url[s].")
 @click.option("-t", "--token", required=True, type=str, help="Gitlab API token.")
 @click.pass_obj
 @generator
@@ -308,9 +306,7 @@ def transform(
     This command applies a set of transformations to one or multiple provenance documents.
     """
     for document in documents:
-        transformed = bus.handle(
-            commands.Transform(document, use_pseudonyms, remove_duplicates, merge_aliased_agents)
-        )
+        transformed = bus.handle(commands.Transform(document, use_pseudonyms, remove_duplicates, merge_aliased_agents))
         transformed.description = f"normalized {document.description}"
         yield transformed
 
@@ -358,9 +354,7 @@ def combine(bus, documents: Iterator[ProvDocument]):
 )
 @processor
 @click.pass_obj
-def statistics(
-    bus, documents: Iterator[ProvDocument], resolution: str, format: str, explain: bool
-):
+def statistics(bus, documents: Iterator[ProvDocument], resolution: str, format: str, explain: bool):
     """Print statistics for one or more provenance documents.
 
     This command prints statistics for each processed provenance graph.

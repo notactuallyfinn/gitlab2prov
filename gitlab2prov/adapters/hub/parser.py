@@ -48,11 +48,7 @@ class GithubAnnotationParser:
 
     @staticmethod
     def filter_valid(annotations):
-        return [
-            annot
-            for annot in annotations
-            if annot.annotator is not None and annot.start is not None
-        ]
+        return [annot for annot in annotations if annot.annotator is not None and annot.start is not None]
 
     def parse(self, annotations: list[A]) -> list[Annotation]:
         parsed_annotations = []

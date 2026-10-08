@@ -58,9 +58,7 @@ class AnnotationClassifier(Classifier):
 CLASSIFIERS = [
     AnnotationClassifier(
         name="change_target_branch",
-        patterns=[
-            r"^changed target branch from `(?P<old_target_branch>.+)` to `(?P<new_target_branch>.+)`$"
-        ],
+        patterns=[r"^changed target branch from `(?P<old_target_branch>.+)` to `(?P<new_target_branch>.+)`$"],
     ),
     AnnotationClassifier(
         name="change_epic",
@@ -348,18 +346,14 @@ CLASSIFIERS = [
         ],
     ),
     AnnotationClassifier(name="resolve_all_threads", patterns=[r"^resolved all threads$"]),
-    AnnotationClassifier(
-        name="approve_merge_request", patterns=[r"^approved this merge request$"]
-    ),
+    AnnotationClassifier(name="approve_merge_request", patterns=[r"^approved this merge request$"]),
     AnnotationClassifier(
         name="resolve_all_discussions",
         patterns=[
             r"^resolved all discussions$",
         ],
     ),
-    AnnotationClassifier(
-        name="unapprove_merge_request", patterns=[r"^unapproved this merge request$"]
-    ),
+    AnnotationClassifier(name="unapprove_merge_request", patterns=[r"^unapproved this merge request$"]),
     AnnotationClassifier(
         name="enable_automatic_merge_on_pipeline_completion",
         patterns=[
@@ -407,9 +401,7 @@ CLASSIFIERS = [
         name="cancel_review_request",
         patterns=[r"^removed review request for @(?P<user_name>.*)$"],
     ),
-    AnnotationClassifier(
-        name="mention_in_epic", patterns=[r"^mentioned in epic &(?P<noteable_iid>\d+)$"]
-    ),
+    AnnotationClassifier(name="mention_in_epic", patterns=[r"^mentioned in epic &(?P<noteable_iid>\d+)$"]),
     AnnotationClassifier(
         name="reassign_user",
         patterns=[
@@ -418,9 +410,7 @@ CLASSIFIERS = [
     ),
     AnnotationClassifier(
         name="remove_merge_request_from_merge_train",
-        patterns=[
-            r"^removed this merge request from the merge train because no stages / jobs for this pipeline.$"
-        ],
+        patterns=[r"^removed this merge request from the merge train because no stages / jobs for this pipeline.$"],
     ),
     AnnotationClassifier(
         name="start_merge_train",

@@ -139,9 +139,7 @@ class GitlabAnnotationParser:
             end=award.created_at,
         )
 
-    def parse_label(
-        self, label: ProjectIssueResourceLabelEvent | ProjectMergeRequestResourceLabelEvent
-    ) -> Annotation:
+    def parse_label(self, label: ProjectIssueResourceLabelEvent | ProjectMergeRequestResourceLabelEvent) -> Annotation:
         annotator = User(
             name=label.user.get("name"),
             email=label.user.get("email"),

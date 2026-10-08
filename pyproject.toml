@@ -79,7 +79,7 @@ profile = "black"
 py_version = 313
 
 [tool.black]
-line-length = 99
+line-length = 120
 target-version = ['py313']
 
 [tool.bumpversion]

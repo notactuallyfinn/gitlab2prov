@@ -12,10 +12,7 @@ class TestFile:
     def test_identifier_property(self):
         # Test identifier property
         file_obj = File(name="test_file.txt", path="/path/to/file", commit="12345")
-        assert (
-            file_obj.identifier.localpart
-            == "File?name=test_file.txt&path=/path/to/file&commit=12345"
-        )
+        assert file_obj.identifier.localpart == "File?name=test_file.txt&path=/path/to/file&commit=12345"
 
     def test_to_prov_element_method(self):
         # Test to_prov_element() method

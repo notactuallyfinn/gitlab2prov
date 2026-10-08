@@ -58,9 +58,7 @@ def deserialize_string(content: str, format: str = None):
     raise ValueError(f"Deserialization failed for content: {content} and format: {format}")
 
 
-def write_provenance_file(
-    document: ProvDocument, filename: str, format: str = "json", overwrite: bool = True
-) -> None:
+def write_provenance_file(document: ProvDocument, filename: str, format: str = "json", overwrite: bool = True) -> None:
     """Write a ProvDocument to a file."""
     mode = "x" if not overwrite else "w"
     try:
@@ -304,9 +302,7 @@ def pseudonymize_agent(agent: ProvAgent, pseudonyms: dict) -> ProvAgent:
 
     kept = [(key, val) for key, val in agent.extra_attributes if key in keep]
     replaced = [
-        (key, replace.get(key.localpart, val))
-        for key, val in agent.extra_attributes
-        if key.localpart in replace
+        (key, replace.get(key.localpart, val)) for key, val in agent.extra_attributes if key.localpart in replace
     ]
 
     pseudonymized_agent = ProvAgent(agent.bundle, pseudonym, kept + replaced)

@@ -211,12 +211,8 @@ class FileDeletionModel:
             # Add the communication relation (wasInformedBy) between the parent and the commit
             self.ctx.add_relation(self.commit, self.parent, ProvCommunication)
         # Add the relations to the context
-        self.ctx.add_relation(
-            self.commit, self.commit.committer, ProvAssociation, {PROV_ROLE: ProvRole.COMMITTER}
-        )
-        self.ctx.add_relation(
-            self.commit, self.commit.author, ProvAssociation, {PROV_ROLE: ProvRole.AUTHOR}
-        )
+        self.ctx.add_relation(self.commit, self.commit.committer, ProvAssociation, {PROV_ROLE: ProvRole.COMMITTER})
+        self.ctx.add_relation(self.commit, self.commit.author, ProvAssociation, {PROV_ROLE: ProvRole.AUTHOR})
         self.ctx.add_relation(self.revision, self.revision.file, ProvSpecialization)
         self.ctx.add_relation(
             self.revision,
@@ -255,12 +251,8 @@ class FileModificationModel:
             # Add the communication relation (wasInformedBy) between the parent and the commit
             self.ctx.add_relation(self.commit, self.parent, ProvCommunication)
         # Add the relations to the context
-        self.ctx.add_relation(
-            self.commit, self.commit.author, ProvAssociation, {PROV_ROLE: ProvRole.AUTHOR}
-        )
-        self.ctx.add_relation(
-            self.commit, self.commit.committer, ProvAssociation, {PROV_ROLE: ProvRole.COMMITTER}
-        )
+        self.ctx.add_relation(self.commit, self.commit.author, ProvAssociation, {PROV_ROLE: ProvRole.AUTHOR})
+        self.ctx.add_relation(self.commit, self.commit.committer, ProvAssociation, {PROV_ROLE: ProvRole.COMMITTER})
         self.ctx.add_relation(self.revision, self.revision.file, ProvSpecialization)
         self.ctx.add_relation(
             self.revision,
@@ -498,9 +490,7 @@ class ReleaseModel:
             ProvGeneration,
             {PROV_ATTR_STARTTIME: self.tag.creation.start, PROV_ROLE: ProvRole.TAG},
         )
-        self.ctx.add_relation(
-            self.tag.creation, self.tag.author, ProvAssociation, {PROV_ROLE: ProvRole.TAG_AUTHOR}
-        )
+        self.ctx.add_relation(self.tag.creation, self.tag.author, ProvAssociation, {PROV_ROLE: ProvRole.TAG_AUTHOR})
 
 
 @dataclass
@@ -538,9 +528,7 @@ class GitTagModel:
             {PROV_ATTR_STARTTIME: self.tag.creation.start, PROV_ROLE: ProvRole.TAG},
         )
         self.ctx.add_relation(self.tag, self.tag.author, ProvAttribution)
-        self.ctx.add_relation(
-            self.tag.creation, self.tag.author, ProvAssociation, {PROV_ROLE: ProvRole.TAG_AUTHOR}
-        )
+        self.ctx.add_relation(self.tag.creation, self.tag.author, ProvAssociation, {PROV_ROLE: ProvRole.TAG_AUTHOR})
         # Add commit relationships
         if self.commit:
             self.ctx.add_relation(self.commit, self.tag, ProvMembership)
@@ -565,12 +553,7 @@ class CallableModel:
     """A model that can be called to build a provenance document."""
 
     model: Type[
-        FileAdditionModel
-        | FileModificationModel
-        | FileDeletionModel
-        | HostedResourceModel
-        | GitTagModel
-        | ReleaseModel
+        FileAdditionModel | FileModificationModel | FileDeletionModel | HostedResourceModel | GitTagModel | ReleaseModel
     ]
     query: Query
     document: ProvDocument = field(init=False)

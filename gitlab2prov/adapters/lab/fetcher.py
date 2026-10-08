@@ -58,9 +58,7 @@ class GitlabFetcher:
                     sha=commit.id,
                     url=commit.web_url,
                     platform="gitlab",
-                    author=User(
-                        commit.author_name, commit.author_email, prov_role=ProvRole.COMMIT_AUTHOR
-                    ),
+                    author=User(commit.author_name, commit.author_email, prov_role=ProvRole.COMMIT_AUTHOR),
                     annotations=self.parser.parse(
                         [
                             *commit.comments.list(all=True, system=False),
@@ -144,9 +142,7 @@ class GitlabFetcher:
                     created_at=merge.created_at,
                     closed_at=merge.closed_at,
                     merged_at=merge.merged_at,
-                    first_deployed_to_production_at=getattr(
-                        merge, "first_deployed_to_production_at", None
-                    ),
+                    first_deployed_to_production_at=getattr(merge, "first_deployed_to_production_at", None),
                 )
         except GitlabListError as err:
             self.log_list_err(log, err, "merge requests")
