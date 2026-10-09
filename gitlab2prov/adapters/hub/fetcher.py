@@ -27,7 +27,7 @@ class GithubFetcher:
     token: InitVar[str]
     url: InitVar[str]
 
-    parser: GithubAnnotationParser = GithubAnnotationParser()
+    parser: GithubAnnotationParser = field(default_factory=GithubAnnotationParser)
     client: Github = field(init=False)
     repository: Repository = field(init=False)
 

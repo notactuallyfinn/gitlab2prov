@@ -31,7 +31,7 @@ class GitlabFetcher:
 
     client: Gitlab = field(init=False)
     project: Project = field(init=False)
-    parser: GitlabAnnotationParser = GitlabAnnotationParser()
+    parser: GitlabAnnotationParser = field(default_factory=GitlabAnnotationParser)
 
     def __post_init__(self, token: str, url: str) -> None:
         url: GitlabProjectUrl = GitlabProjectUrl(url)

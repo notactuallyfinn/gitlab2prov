@@ -8,6 +8,7 @@ from prov.identifier import QualifiedName
 from prov.model import (
     PROV_ATTR_ENDTIME,
     PROV_ATTR_STARTTIME,
+    PROV_LABEL,
     PROV_ROLE,
     PROV_TYPE,
     ProvActivity,
@@ -54,6 +55,7 @@ class User(ProvObject):
             ("email", self.email),
             (PROV_ROLE, self.prov_role),
             (PROV_TYPE, ProvType.USER),
+            (PROV_LABEL, self.identifier)
         ]
         if self.gitlab_username:
             attributes.append(("gitlab_username", self.gitlab_username))
@@ -83,6 +85,7 @@ class File(ProvObject):
             ("path", self.path),
             ("commit", self.commit),
             (PROV_TYPE, ProvType.FILE),
+            (PROV_LABEL, self.identifier)
         ]
         return ProvEntity(
             PLACEHOLDER,
@@ -103,7 +106,9 @@ class FileRevision(File):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"FileRevision?{self.name=}&{self.path=}&{self.commit=}&{self.status=}")
+        return qualified_name(
+            f"FileRevision?name={self.name}&path={self.path}&commit={self.commit}&status={self.status}"
+        )
 
     def to_prov_element(self) -> ProvEntity:
         attributes = [
@@ -115,6 +120,7 @@ class FileRevision(File):
             ("lines", self.lines),
             ("score", self.score),
             (PROV_TYPE, ProvType.FILE_REVISION),
+            (PROV_LABEL, self.identifier)
         ]
         return ProvEntity(
             PLACEHOLDER,
@@ -135,7 +141,7 @@ class Annotation(ProvObject):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"Annotation?{self.id=}&{self.name=}")
+        return qualified_name(f"Annotation?id={self.id}&name={self.name}")
 
     def to_prov_element(self) -> ProvActivity:
         attributes = [
@@ -145,7 +151,8 @@ class Annotation(ProvObject):
             (PROV_ATTR_STARTTIME, self.start),
             (PROV_ATTR_ENDTIME, self.end),
             (PROV_TYPE, ProvType.ANNOTATION),
-            *(("captured_" + k, v) for k, v in self.captured_kwargs.items()),
+            (PROV_LABEL, self.identifier),
+            *(("captured_" + k, v) for k, v in self.captured_kwargs.items())
         ]
         return ProvActivity(PLACEHOLDER, self.identifier, attributes)
 
@@ -157,7 +164,7 @@ class Version(ProvObject):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"{self.resource}Version?{self.id=}")
+        return qualified_name(f"{self.resource}Version?id={self.id}")
 
     @classmethod
     def from_commit(cls, commit: Commit):
@@ -185,7 +192,7 @@ class AnnotatedVersion(ProvObject):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"Annotated{self.resource}Version?{self.id=}&{self.annotation=}")
+        return qualified_name(f"Annotated{self.resource}Version?id={self.id}&annotation={self.annotation}")
 
     @classmethod
     def from_commit(cls, commit: Commit, annotation: Annotation):
@@ -210,7 +217,7 @@ class AnnotatedVersion(ProvObject):
         )
 
     def to_prov_element(self) -> ProvEntity:
-        attributes = [("id", self.id), (PROV_TYPE, f"Annotated{self.resource}Version")]
+        attributes = [("id", self.id), (PROV_TYPE, f"Annotated{self.resource}Version"), (PROV_LABEL, self.identifier)]
         return ProvEntity(
             PLACEHOLDER,
             self.identifier,
@@ -227,7 +234,7 @@ class Creation(ProvObject):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"Creation?{self.id=}&{self.resource=}")
+        return qualified_name(f"Creation?id={self.id}&resource={self.resource}")
 
     @classmethod
     def from_tag(cls, tag: GitTag):
@@ -261,6 +268,7 @@ class Creation(ProvObject):
             (PROV_ATTR_STARTTIME, self.start),
             (PROV_ATTR_ENDTIME, self.end),
             (PROV_TYPE, ProvType.CREATION),
+            (PROV_LABEL, self.identifier)
         ]
         return ProvActivity(PLACEHOLDER, self.identifier, attributes)
 
@@ -282,7 +290,7 @@ class GitCommit(ProvObject):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"GitCommit?{self.sha=}")
+        return qualified_name(f"GitCommit?sha={self.sha}")
 
     def to_prov_element(self) -> ProvActivity:
         attributes = [
@@ -293,11 +301,10 @@ class GitCommit(ProvObject):
             ("insertions", self.insertions),
             ("lines", self.lines),
             ("files_changed", self.files_changed),
-            ("authored_at", self.authored_at),
-            ("committed_at", self.committed_at),
             (PROV_ATTR_STARTTIME, self.authored_at),
             (PROV_ATTR_ENDTIME, self.committed_at),
             (PROV_TYPE, ProvType.GIT_COMMIT),
+            (PROV_LABEL, self.identifier)
         ]
         return ProvActivity(PLACEHOLDER, self.identifier, attributes)
 
@@ -317,7 +324,7 @@ class Issue(ProvObject):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"Issue?{self.id=}")
+        return qualified_name(f"Issue?id={self.id}")
 
     @property
     def creation(self) -> Creation:
@@ -342,6 +349,7 @@ class Issue(ProvObject):
             (PROV_ATTR_STARTTIME, self.created_at),
             (PROV_ATTR_ENDTIME, self.closed_at),
             (PROV_TYPE, ProvType.ISSUE),
+            (PROV_LABEL, self.identifier)
         ]
         return ProvActivity(PLACEHOLDER, self.identifier, attributes)
 
@@ -358,7 +366,7 @@ class Commit(ProvObject):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"Commit?{self.sha=}")
+        return qualified_name(f"Commit?sha={self.sha}")
 
     @property
     def creation(self) -> Creation:
@@ -377,11 +385,12 @@ class Commit(ProvObject):
             ("sha", self.sha),
             ("url", self.url),
             ("platform", self.platform),
-            (PROV_ATTR_STARTTIME, self.authored_at),
-            (PROV_ATTR_ENDTIME, self.committed_at),
+            ("authored_at", self.authored_at),
+            ("committed_At", self.committed_at),
             (PROV_TYPE, ProvType.COMMIT),
+            (PROV_LABEL, self.identifier)
         ]
-        return ProvActivity(PLACEHOLDER, self.identifier, attributes)
+        return ProvEntity(PLACEHOLDER, self.identifier, attributes)
 
 
 @dataclass
@@ -403,7 +412,7 @@ class MergeRequest(ProvObject):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"MergeRequest?{self.id=}")
+        return qualified_name(f"MergeRequest?id={self.id}")
 
     @property
     def creation(self) -> Creation:
@@ -434,6 +443,7 @@ class MergeRequest(ProvObject):
             (PROV_ATTR_STARTTIME, self.created_at),
             (PROV_ATTR_ENDTIME, self.closed_at),
             (PROV_TYPE, ProvType.MERGE_REQUEST),
+            (PROV_LABEL, self.identifier)
         ]
         return ProvActivity(PLACEHOLDER, self.identifier, attributes)
 
@@ -448,7 +458,7 @@ class GitTag(ProvObject):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"GitTag?{self.name=}")
+        return qualified_name(f"GitTag?name={self.name}")
 
     @property
     def creation(self) -> Creation:
@@ -464,6 +474,7 @@ class GitTag(ProvObject):
             (PROV_ATTR_ENDTIME, self.created_at),
             (PROV_TYPE, ProvType.TAG),
             (PROV_TYPE, ProvType.COLLECTION),
+            (PROV_LABEL, self.identifier)
         ]
         return ProvEntity(PLACEHOLDER, self.identifier, attributes)
 
@@ -475,13 +486,14 @@ class Asset(ProvObject):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"Asset?{self.url=}")
+        return qualified_name(f"Asset?url={self.url}")
 
     def to_prov_element(self) -> ProvEntity:
         attributes = [
             ("url", self.url),
             ("format", self.format),
             (PROV_TYPE, ProvType.ASSET),
+            (PROV_LABEL, self.identifier)
         ]
         return ProvEntity(PLACEHOLDER, self.identifier, attributes)
 
@@ -494,7 +506,7 @@ class Evidence(ProvObject):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"Evidence?{self.sha=}")
+        return qualified_name(f"Evidence?sha={self.sha}")
 
     def to_prov_element(self) -> ProvEntity:
         attributes = [
@@ -502,6 +514,7 @@ class Evidence(ProvObject):
             ("url", self.url),
             ("collected_at", self.collected_at),
             (PROV_TYPE, ProvType.EVIDENCE),
+            (PROV_LABEL, self.identifier)
         ]
         return ProvEntity(PLACEHOLDER, self.identifier, attributes)
 
@@ -520,7 +533,7 @@ class Release(ProvObject):
 
     @property
     def identifier(self) -> QualifiedName:
-        return qualified_name(f"Release?{self.name=}")
+        return qualified_name(f"Release?name={self.name}")
 
     @property
     def creation(self) -> Creation:
@@ -536,5 +549,6 @@ class Release(ProvObject):
             ("released_at", self.released_at),
             (PROV_TYPE, ProvType.RELEASE),
             (PROV_TYPE, ProvType.COLLECTION),
+            (PROV_LABEL, self.identifier)
         ]
         return ProvEntity(PLACEHOLDER, self.identifier, attributes)

@@ -240,12 +240,17 @@ def extract(bus: MessageBus, urls: list[str], token: str) -> Iterator[ProvDocume
     document = None
 
     for url in urls:
-        doc = bus.handle(Fetch(url, token))
+        bus.handle(Fetch(url, token))
         doc = bus.handle(Serialize(url))
+        with open("temp1.txt", "w") as file:
+            file.write(str(doc.serialize()))
         doc = bus.handle(Transform(doc))
+        with open("temp2.txt", "w") as file:
+            file.write(str(doc.serialize()))
         if not document:
             document = doc
-        document.update(doc)
+        else:
+            document.update(doc)
 
     document.description = f"extracted from '{', '.join(urls)}'"
     yield document

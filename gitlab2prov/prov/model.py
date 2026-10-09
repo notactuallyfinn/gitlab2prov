@@ -58,6 +58,8 @@ def file_status_query(
 ]:
     for revision in repository.list_all(FileRevision, status=status):
         commit = repository.get(GitCommit, sha=revision.commit)
+        if commit is None:
+            continue
         for parent in [repository.get(GitCommit, sha=sha) for sha in commit.parents]:
             if status == "modified":
                 yield commit, parent, revision, revision.previous

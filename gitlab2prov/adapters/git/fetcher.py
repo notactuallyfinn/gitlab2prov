@@ -1,5 +1,7 @@
 from collections.abc import Iterator
 from dataclasses import dataclass
+from itertools import zip_longest
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Self
 
@@ -34,7 +36,7 @@ class GitFetcher:
         self.repo = Repo.clone_from(clone_url, self.tmpdir.name)
 
     def fetch_git(self) -> Iterator[GitCommit | File | FileRevision]:
-        for commit in self._repo.iter_commits("--all"):
+        for commit in self.repo.iter_commits("--all"):
             yield self.git_commit_to_domain_commit(commit)
             for file in self.fetch_files_for_commit(commit):
                 yield file
@@ -44,14 +46,18 @@ class GitFetcher:
     @staticmethod
     def git_commit_to_domain_commit(commit: Commit) -> GitCommit:
         return GitCommit(
-            hexsha=commit.hexsha,
-            message=commit.message,
+            sha=commit.hexsha,
             title=commit.summary,
+            message=commit.message,
             author=get_author(commit),
             committer=get_committer(commit),
+            deletions=commit.stats.total["deletions"],
+            insertions=commit.stats.total["insertions"],
+            lines=commit.stats.total["lines"],
+            files_changed=commit.stats.total["files"],
             parents=[parent.hexsha for parent in commit.parents],
-            prov_start=commit.authored_datetime,
-            prov_end=commit.committed_datetime,
+            authored_at=commit.authored_datetime,
+            committed_at=commit.committed_datetime,
         )
 
     def fetch_files_for_commit(self, commit: Commit) -> Iterator[File]:
@@ -64,30 +70,38 @@ class GitFetcher:
         # disregard modifications and deletions
         for diff_item in diff.iter_change_type(ChangeType.ADDED):
             # path for new files is stored in diff b_path
-            yield File(path=diff_item.b_path, committed_in=commit.hexsha)
+            yield File(name=Path(diff_item.b_path).name, path=diff_item.b_path, commit=commit.hexsha)
 
     def fetch_revisions_for_file(self, file: File) -> Iterator[FileRevision]:
-        log = self._repo.git.log(
-            "--all",
-            "--follow",
-            "--name-status",
-            f"--pretty=format:{LOG_DELIMITER}%n%H",
-            "--",
-            file.path,
-        )
-
-        prev_revision = None
-
-        for hexsha, status, path in reversed(list(parse_log(log))):
-            revision = FileRevision(
-                path=path,
-                committed_in=hexsha,
-                change_type=status,
-                original=file,
-                previous=prev_revision,
+        revs = []
+        for path, hexsha, status in parse_log(
+            self.repo.git.log(
+                "--all",
+                "--follow",
+                "--name-status",
+                "--pretty=format:%H",
+                "--",
+                file.path,
             )
-            yield revision
-            prev_revision = revision
+        ):
+            status = {"A": "added", "M": "modified", "D": "deleted"}.get(status, "modified")
+            revs.append(
+                FileRevision(
+                    name=Path(path).name,
+                    path=path,
+                    commit=hexsha,
+                    status=status,
+                    insertions=0,
+                    deletions=0,
+                    lines=0,
+                    score=0,
+                    file=file,
+                )
+            )
+        # revisions remember their predecessor (previous revision)
+        for rev, prev in zip_longest(revs, revs[1:]):
+            rev.previous = prev
+            yield rev
 
 
 def get_author(commit: Commit) -> User:

@@ -1,6 +1,6 @@
 import logging
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable, TypeVar
 
 from gitlab.v4.objects import (
@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 @dataclass
 class GitlabAnnotationParser:
 
-    classifier: SystemNoteClassifier = SystemNoteClassifier()
+    classifier: SystemNoteClassifier = field(default_factory=SystemNoteClassifier)
 
     @staticmethod
     def sort_by_date(annotations: list[Annotation]) -> list[Annotation]:
