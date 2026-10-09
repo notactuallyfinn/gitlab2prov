@@ -26,7 +26,7 @@ def fetch_git(cmd: Fetch, uow: InMemoryUnitOfWork, git_fetcher: GitFetcher) -> N
     with git_fetcher as fetcher:
         fetcher.do_clone(cmd.url, cmd.token)
         with uow:
-            for resource in fetcher.fetch_all():
+            for resource in fetcher.fetch_git():
                 log.info(f"add {resource=}")
                 uow.resources[cmd.url].add(resource)
         uow.commit()

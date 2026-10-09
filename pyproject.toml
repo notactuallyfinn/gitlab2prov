@@ -83,11 +83,11 @@ line-length = 120
 target-version = ['py313']
 
 [tool.bumpversion]
-current_version = "2.1.0"
+current_version = "2.2.0"
 commit = true
 tag = true
 tag_name = "{new_version}"
-message = "Bump version: {current_version} → {new_version}"
+message = "Bump version: {current_version} -> {new_version}"
 
 [[tool.bumpversion.files]]
 filename = "gitlab2prov/__init__.py"
