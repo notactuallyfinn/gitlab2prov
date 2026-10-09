@@ -60,7 +60,7 @@ def get_committer(commit: Commit) -> User:
     )
 
 
-def parse_log(log: str) -> zip[str, str, str]:
+def parse_log(log: str) -> Iterator[tuple[str, str, str]]:
     """Parse 'git log' output into file paths, commit hexshas, file status (aka change type).
     Example:
     >>> parse_log(
