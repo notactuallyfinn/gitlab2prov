@@ -33,8 +33,8 @@ class GitlabFetcher:
     project: Project = field(init=False)
     parser: GitlabAnnotationParser = GitlabAnnotationParser()
 
-    def __post_init__(self, token, url) -> None:
-        url = GitlabProjectUrl(url)
+    def __post_init__(self, token: str, url: str) -> None:
+        url: GitlabProjectUrl = GitlabProjectUrl(url)
         self.client = Gitlab(url.instance, private_token=token)
         self.project = self.client.projects.get(url.slug)
 
@@ -71,7 +71,7 @@ class GitlabFetcher:
         except GitlabListError as err:
             self.log_list_err(log, err, "commits")
 
-    def fetch_issues(self, state="all") -> Iterator[Issue]:
+    def fetch_issues(self, state: str = "all") -> Iterator[Issue]:
         try:
             for issue in self.project.issues.list(all=True, state=state, per_page=100):
                 yield Issue(
@@ -107,7 +107,7 @@ class GitlabFetcher:
         except GitlabListError as err:
             self.log_list_err(log, err, "issues")
 
-    def fetch_mergerequests(self, state="all") -> Iterator[MergeRequest]:
+    def fetch_mergerequests(self, state: str = "all") -> Iterator[MergeRequest]:
         try:
             for merge in self.project.mergerequests.list(all=True, state=state, per_page=100):
                 yield MergeRequest(

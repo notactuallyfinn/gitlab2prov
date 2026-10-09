@@ -4,7 +4,7 @@ import logging
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Any, NamedTuple, Optional, Sequence, Type
+from typing import NamedTuple, Optional, Sequence, Type
 from urllib.parse import urlencode
 
 from prov.dot import prov_to_dot
@@ -45,7 +45,7 @@ def read_provenance_file(filename: str) -> ProvDocument:
     return deserialize_string(content=content)
 
 
-def deserialize_string(content: str, format: str = None):
+def deserialize_string(content: str, format: str = None) -> ProvDocument:
     """Deserialize a ProvDocument from a string."""
     formats = [format] if format else DESERIALIZATION_FORMATS
     for fmt in formats:
@@ -172,7 +172,7 @@ def read(fp: Path) -> dict[str, list[str]]:
     return d
 
 
-def read_duplicated_agent_mapping(fp: str):
+def read_duplicated_agent_mapping(fp: str) -> dict[str, list[str]]:
     """Mapping that maps user names to a list of their aliases."""
     with open(fp, "rt") as f:
         yaml = YAML(type="safe")
@@ -180,17 +180,17 @@ def read_duplicated_agent_mapping(fp: str):
     return {agent["name"]: agent["aliases"] for agent in agents}
 
 
-def build_inverse_index(mapping):
+def build_inverse_index(mapping: dict[str, list[str]]) -> dict[str, str]:
     """Build the inverse index for a double agent mapping."""
     return {alias: name for name, aliases in mapping.items() for alias in aliases}
 
 
-def uncover_name(agent: str, names: dict[str, str]) -> tuple[QualifiedName, str]:
+def uncover_name(agent: ProvRecord, names: dict[str, str]) -> tuple[QualifiedName, str]:
     [(qn, name)] = [(key, val) for key, val in agent.attributes if key.localpart == "name"]
     return qn, names.get(name, name)
 
 
-def merge_duplicated_agents(graph, path_to_mapping):
+def merge_duplicated_agents(graph: ProvDocument, path_to_mapping: str) -> ProvDocument:
     log.info(f"resolve aliases in {graph=}")
     mapping = read_duplicated_agent_mapping(path_to_mapping)
     names = build_inverse_index(mapping)
@@ -227,7 +227,7 @@ def merge_duplicated_agents(graph, path_to_mapping):
     return graph_factory(records).unified()
 
 
-def get_attribute(record: ProvRecord, attribute: str, first: bool = True) -> str | None:
+def get_attribute(record: ProvRecord, attribute: str, first: bool = True) -> str | list[str] | None:
     choices = list(record.get_attribute(attribute))
     if not choices:
         return
@@ -285,7 +285,9 @@ def generate_pseudonym(name: str, email: str = None) -> QualifiedName:
     return qualified_name(f"User?name={name_hash}&email={email_hash}")
 
 
-def pseudonymize_agent(agent: ProvAgent, pseudonyms: dict) -> ProvAgent:
+def pseudonymize_agent(
+    agent: ProvAgent, pseudonyms: dict
+) -> tuple[ProvAgent, QualifiedName | None, QualifiedName | None]:
     """Replace agent identifier with pseudonym."""
     name = get_attribute(agent, USERNAME)
     mail = get_attribute(agent, USEREMAIL)

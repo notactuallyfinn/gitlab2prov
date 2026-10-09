@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from itertools import zip_longest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Self
 
 from git import Commit, Repo
 
@@ -19,11 +20,11 @@ class GitFetcher:
     repo: Repo | None = None
     tmpdir: TemporaryDirectory | None = None
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         self.tmpdir = TemporaryDirectory(ignore_cleanup_errors=True)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         if self.repo:
             self.repo.close()
         if self.tmpdir:
@@ -59,7 +60,7 @@ def get_committer(commit: Commit) -> User:
     )
 
 
-def parse_log(log: str):
+def parse_log(log: str) -> zip[str, str, str]:
     """Parse 'git log' output into file paths, commit hexshas, file status (aka change type).
     Example:
     >>> parse_log(

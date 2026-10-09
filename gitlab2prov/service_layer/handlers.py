@@ -2,13 +2,26 @@ import logging
 
 from prov.model import ProvDocument
 
-from gitlab2prov.domain import commands
-from gitlab2prov.prov import model, operations
+from gitlab2prov.adapters.git.fetcher import GitFetcher
+from gitlab2prov.adapters.hub.fetcher import GithubFetcher
+from gitlab2prov.adapters.lab.fetcher import GitlabFetcher
+from gitlab2prov.domain.commands import (
+    Combine,
+    Fetch,
+    Read,
+    Serialize,
+    Statistics,
+    Transform,
+    Write,
+)
+from gitlab2prov.prov import operations as ops
+from gitlab2prov.prov.model import MODELS
+from gitlab2prov.service_layer.unit_of_work import InMemoryUnitOfWork
 
 log = logging.getLogger(__name__)
 
 
-def fetch_git(cmd: commands.Fetch, uow, git_fetcher) -> None:
+def fetch_git(cmd: Fetch, uow: InMemoryUnitOfWork, git_fetcher: GitFetcher) -> None:
     log.info(f"fetch {cmd=}")
     with git_fetcher as fetcher:
         fetcher.do_clone(cmd.url, cmd.token)
@@ -19,7 +32,9 @@ def fetch_git(cmd: commands.Fetch, uow, git_fetcher) -> None:
         uow.commit()
 
 
-def fetch_githosted(cmd: commands.Fetch, uow, githosted_fetcher) -> None:
+def fetch_githosted(
+    cmd: Fetch, uow: InMemoryUnitOfWork, githosted_fetcher: type[GithubFetcher | GitlabFetcher]
+) -> None:
     log.info(f"fetch {cmd=}")
     fetcher = githosted_fetcher(cmd.token, cmd.url)
     with uow:
@@ -29,57 +44,57 @@ def fetch_githosted(cmd: commands.Fetch, uow, githosted_fetcher) -> None:
         uow.commit()
 
 
-def serialize(cmd: commands.Serialize, uow) -> ProvDocument:
-    log.info(f"serialize graph consisting of {model.MODELS=}")
+def serialize(cmd: Serialize, uow: InMemoryUnitOfWork) -> ProvDocument:
+    log.info(f"serialize graph consisting of {MODELS=}")
     document = ProvDocument()
-    for prov_model in model.MODELS:
+    for prov_model in MODELS:
         log.info(f"populate {prov_model=}")
         provenance = prov_model(uow.resources[cmd.url])
-        document = operations.combine(document, provenance)
-        document = operations.dedupe(document)
+        document = ops.combine(document, provenance)
+        document = ops.dedupe(document)
     return document
 
 
-def transform(cmd: commands.Transform):
+def transform(cmd: Transform) -> ProvDocument:
     log.info(f"transform {cmd=}")
     if cmd.remove_duplicates:
-        cmd.document = operations.dedupe(cmd.doc)
+        cmd.document = ops.dedupe(cmd.document)
     if cmd.use_pseudonyms:
-        cmd.document = operations.pseudonymize(cmd.doc)
+        cmd.document = ops.pseudonymize(cmd.document)
     if cmd.merge_aliased_agents:
-        cmd.document = operations.merge_duplicated_agents(cmd.doc, cmd.merge_aliased_agents)
+        cmd.document = ops.merge_duplicated_agents(cmd.document, cmd.merge_aliased_agents)
     return cmd.document
 
 
-def combine(cmd: commands.Combine):
+def combine(cmd: Combine) -> ProvDocument:
     log.info(f"combine {cmd=}")
-    return operations.combine(*cmd.documents)
+    return ops.combine(*cmd.documents)
 
 
-def write_file(cmd: commands.Write):
+def write_file(cmd: Write) -> None:
     log.info(f"write {cmd=}")
-    return operations.write_provenance_file(cmd.document, cmd.filename, cmd.format)
+    ops.write_provenance_file(cmd.document, cmd.filename, cmd.format)
 
 
-def read_file(cmd: commands.Read):
+def read_file(cmd: Read) -> ProvDocument:
     log.info(f"read {cmd=}")
-    return operations.read_provenance_file(cmd.filename)
+    return ops.read_provenance_file(cmd.filename)
 
 
-def statistics(cmd: commands.Statistics):
+def statistics(cmd: Statistics) -> str:
     log.info(f"statistics {cmd=}")
-    return operations.stats(cmd.document, cmd.resolution, cmd.format)
+    return ops.stats(cmd.document, cmd.resolution, cmd.format)
 
 
 HANDLERS = {
-    commands.Fetch: [
+    Fetch: [
         fetch_git,
         fetch_githosted,
     ],
-    commands.Serialize: [serialize],
-    commands.Read: [read_file],
-    commands.Write: [write_file],
-    commands.Combine: [combine],
-    commands.Transform: [transform],
-    commands.Statistics: [statistics],
+    Serialize: [serialize],
+    Read: [read_file],
+    Write: [write_file],
+    Combine: [combine],
+    Transform: [transform],
+    Statistics: [statistics],
 }

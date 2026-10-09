@@ -31,7 +31,7 @@ class GithubFetcher:
     client: Github = field(init=False)
     repository: Repository = field(init=False)
 
-    def __post_init__(self, token, url) -> None:
+    def __post_init__(self, token: str, url: str) -> None:
         self.client = Github(login_or_token=token, per_page=100)
         self.repository = self.client.get_repo(full_name_or_id=GithubProjectUrl(url).slug)
         log.warning(f"Remaining requests: {self.client.rate_limiting[0]}")

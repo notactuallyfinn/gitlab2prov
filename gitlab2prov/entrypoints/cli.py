@@ -1,43 +1,64 @@
 from functools import partial, update_wrapper, wraps
-from typing import Iterator
+from typing import Iterator, NoReturn
 
 import click
-import git
+from git import Git
+from git.exc import GitCommandNotFound
 from prov.model import ProvDocument
 
 from gitlab2prov import __version__, bootstrap
 from gitlab2prov.config import Config
-from gitlab2prov.domain import commands
+from gitlab2prov.domain.commands import (
+    Combine,
+    Fetch,
+    Read,
+    Serialize,
+    Statistics,
+    Transform,
+    Write,
+)
 from gitlab2prov.log import create_logger
 from gitlab2prov.prov import operations
+from gitlab2prov.service_layer.messagebus import MessageBus
 
 
-def is_git_available():
-    """Check whether git is installed using the GitPython package."""
+def is_git_available() -> bool:
+    """
+    Check whether git is installed using the GitPython package.
+
+    Returns:
+        bool: Whether git is installed or not.
+    """
     try:
-        git.Git().execute(["git", "--version"])
+        Git().execute(["git", "--version"])
         return True
-    except git.exc.GitCommandNotFound:
+    except GitCommandNotFound:
         return False
 
 
-def is_git_available():
-    """Check whether git is installed using the GitPython package."""
-    try:
-        git.Git().execute(["git", "--version"])
-        return True
-    except git.exc.GitCommandNotFound:
-        return False
+def enable_logging(ctx: click.Context, param: str, enable: bool) -> None:
+    """
+    Callback that optionally enables logging.
 
-
-def enable_logging(ctx: click.Context, param: str, enable: bool):
-    """Callback that optionally enables logging."""
+    Args:
+        ctx (Context): The click context of the command run.
+        enable (str): Whether logging should be enabled.
+    """
     if enable:
         create_logger()
 
 
-def load_and_validate_config(ctx: click.Context, filepath: str) -> Config:
-    """Load configuration from file and validate it. Returns the config if successful, otherwise fails the context."""
+def load_and_validate_config(ctx: click.Context, filepath: str) -> Config | None | NoReturn:
+    """
+    Load configuration from file and validate it. Returns the config if successful, otherwise fails the context.
+
+    Args:
+        ctx (Context): The click context of the command run.
+        filepath (str): The path to the config file.
+
+    Returns:
+        Config: The validated config files content.
+    """
     if not filepath:
         return None
     config = Config.read(filepath)
@@ -47,8 +68,14 @@ def load_and_validate_config(ctx: click.Context, filepath: str) -> Config:
     return config
 
 
-def execute_command_from_config(ctx: click.Context, param: str, filepath: str):
-    """Callback that executes a gitlab2prov run from a config file."""
+def execute_command_from_config(ctx: click.Context, param: str, filepath: str) -> None | NoReturn:
+    """
+    Callback that executes a gitlab2prov run from a config file.
+
+    Args:
+        ctx (Context): The click context of the command run.
+        filepath (str): The path to the config file.
+    """
     config = load_and_validate_config(ctx, filepath)
     if not config:
         return
@@ -58,8 +85,14 @@ def execute_command_from_config(ctx: click.Context, param: str, filepath: str):
     ctx.exit()
 
 
-def validate_config(ctx: click.Context, param: str, filepath: str):
-    """Callback that validates config file using gitlab2prov/config/schema.json."""
+def validate_config(ctx: click.Context, param: str, filepath: str) -> None | NoReturn:
+    """
+    Callback that validates config file using gitlab2prov/config/schema.json.
+
+    Args:
+        ctx (Context): The click context of the command run.
+        filepath (str): The path to the config file.
+    """
     config = load_and_validate_config(ctx, filepath)
     if not config:
         return
@@ -128,7 +161,7 @@ def generator(func):
     help="Validate config file and exit.",
 )
 @click.pass_context
-def gitlab2prov(ctx):
+def gitlab2prov(ctx: click.Context):
     """
     Extract provenance information from GitLab projects.
     """
@@ -162,7 +195,12 @@ def gitlab2prov(ctx):
     help="Validate config file and exit.",
 )
 @click.pass_context
-def github2prov(ctx):
+def github2prov(ctx: click.Context):
+    """
+    Extract provenance information from GitHub projects.
+    """
+    if not is_git_available():
+        ctx.fail("Could not find git. Please install git.")
     ctx.obj = bootstrap.bootstrap("github")
 
 
@@ -193,7 +231,7 @@ def process_commands(processors, **kwargs):
 @click.option("-t", "--token", required=True, type=str, help="Gitlab API token.")
 @click.pass_obj
 @generator
-def extract(bus, urls: list[str], token: str):
+def extract(bus: MessageBus, urls: list[str], token: str) -> Iterator[ProvDocument]:
     """Extract provenance information for one or more gitlab projects.
 
     This command extracts provenance information from one or multiple gitlab projects.
@@ -202,9 +240,9 @@ def extract(bus, urls: list[str], token: str):
     document = None
 
     for url in urls:
-        doc = bus.handle(commands.Fetch(url, token))
-        doc = bus.handle(commands.Serialize(url))
-        doc = bus.handle(commands.Transform(doc))
+        doc = bus.handle(Fetch(url, token))
+        doc = bus.handle(Serialize(url))
+        doc = bus.handle(Transform(doc))
         if not document:
             document = doc
         document.update(doc)
@@ -225,7 +263,7 @@ def extract(bus, urls: list[str], token: str):
 )
 @click.pass_obj
 @generator
-def read(bus, filenames: list[str]):
+def read(bus: MessageBus, filenames: list[str]) -> Iterator[ProvDocument]:
     """Read provenance information from file[s].
 
     This command reads one provenance graph from a file/stdin or
@@ -233,7 +271,7 @@ def read(bus, filenames: list[str]):
     """
     for filename in filenames:
         try:
-            document = bus.handle(commands.Read(filename=filename))
+            document = bus.handle(Read(filename=filename))
             document.description = "'<stdin>'" if filename == "-" else f"'{filename}'"
             yield document
         except Exception as e:
@@ -259,7 +297,9 @@ def read(bus, filenames: list[str]):
 )
 @processor
 @click.pass_obj
-def write(bus, documents, formats, destination):
+def write(
+    bus: MessageBus, documents: Iterator[ProvDocument], formats: list[str], destination: str
+) -> Iterator[ProvDocument]:
     """Write provenance information to file[s].
 
     This command saves one or multiple provenance documents to a file.
@@ -273,7 +313,7 @@ def write(bus, documents, formats, destination):
         for fmt in formats:
             filename = f"{destination}{'-' + str(i) if len(documents) > 1 else ''}.{fmt}"
             try:
-                bus.handle(commands.Write(document, filename, fmt))
+                bus.handle(Write(document, filename, fmt))
             except Exception as exc:
                 click.echo(f"Could not save {document.description}: {exc}", err=True)
 
@@ -292,18 +332,18 @@ def write(bus, documents, formats, destination):
 @processor
 @click.pass_obj
 def transform(
-    bus,
+    bus: MessageBus,
     documents: Iterator[ProvDocument],
     use_pseudonyms: bool = False,
     remove_duplicates: bool = False,
     merge_aliased_agents: str = "",
-):
+) -> Iterator[ProvDocument]:
     """Apply a set of transformations to provenance documents.
 
     This command applies a set of transformations to one or multiple provenance documents.
     """
     for document in documents:
-        transformed = bus.handle(commands.Transform(document, use_pseudonyms, remove_duplicates, merge_aliased_agents))
+        transformed = bus.handle(Transform(document, use_pseudonyms, remove_duplicates, merge_aliased_agents))
         transformed.description = f"normalized {document.description}"
         yield transformed
 
@@ -311,7 +351,7 @@ def transform(
 @click.command()
 @processor
 @click.pass_obj
-def combine(bus, documents: Iterator[ProvDocument]):
+def combine(bus: MessageBus, documents: Iterator[ProvDocument]) -> Iterator[ProvDocument]:
     """Combine one or more provenance documents.
 
     This command combines one or multiple provenance documents into a single document.
@@ -320,8 +360,8 @@ def combine(bus, documents: Iterator[ProvDocument]):
     descriptions = [doc.description for doc in documents]
 
     try:
-        document = bus.handle(commands.Combine(documents))
-        document = bus.handle(commands.Transform(document))
+        document = bus.handle(Combine(documents))
+        document = bus.handle(Transform(document))
         document.description = f"combination of {', '.join(descriptions)}"
         yield document
 
@@ -351,7 +391,9 @@ def combine(bus, documents: Iterator[ProvDocument]):
 )
 @processor
 @click.pass_obj
-def statistics(bus, documents: Iterator[ProvDocument], resolution: str, format: str, explain: bool):
+def statistics(
+    bus: MessageBus, documents: Iterator[ProvDocument], resolution: str, format: str, explain: bool
+) -> Iterator[ProvDocument]:
     """Print statistics for one or more provenance documents.
 
     This command prints statistics for each processed provenance graph.
@@ -360,7 +402,7 @@ def statistics(bus, documents: Iterator[ProvDocument], resolution: str, format: 
     """
     for document in documents:
         try:
-            statistics = bus.handle(commands.Statistics(document, resolution, format))
+            statistics = bus.handle(Statistics(document, resolution, format))
             if explain:
                 statistics = f"{document.description}\n\n{statistics}"
                 click.echo(statistics)

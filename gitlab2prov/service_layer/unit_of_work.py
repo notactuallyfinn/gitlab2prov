@@ -1,53 +1,25 @@
-from __future__ import annotations
-
-import abc
 from collections import defaultdict
+from typing import Self
 
-from gitlab2prov.adapters import repository
+from gitlab2prov.adapters.repository import InMemoryRepository
 
 
-class UnitOfWork(abc.ABC):
-    def __enter__(self) -> UnitOfWork:
+class InMemoryUnitOfWork:
+    def __init__(self) -> None:
+        # self.resources = repository.InMemoryRepository()
+        self.resources = defaultdict(InMemoryRepository)
+
+    def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, *args) -> None:
         self.rollback()
 
-    def commit(self):
-        self._commit()
-
-    def reset(self):
-        self._reset()
-
-    @abc.abstractmethod
-    def _commit(self):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def _reset(self):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def rollback(self):
-        raise NotImplementedError
-
-
-class InMemoryUnitOfWork(UnitOfWork):
-    def __init__(self):
-        # self.resources = repository.InMemoryRepository()
-        self.resources = defaultdict(repository.InMemoryRepository)
-
-    def __enter__(self):
-        return super().__enter__()
-
-    def __exit__(self, *args):
-        super().__exit__(*args)
-
-    def _commit(self):
+    def commit(self) -> None:
         pass
 
-    def _reset(self):
-        self.resources = repository.InMemoryRepository()
+    def reset(self) -> None:
+        self.resources = InMemoryRepository()
 
-    def rollback(self):
+    def rollback(self) -> None:
         pass

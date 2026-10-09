@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from functools import partial
 from operator import attrgetter
-from typing import Any, Callable, Iterable, Optional, Type, Union
+from typing import Any, Callable, Iterable, Iterator, Optional, Type, Union
 
 from prov.identifier import Namespace, QualifiedName
 from prov.model import (
@@ -22,7 +22,7 @@ from prov.model import (
     ProvUsage,
 )
 
-from gitlab2prov.adapters.repository import Repository
+from gitlab2prov.adapters.repository import InMemoryRepository
 from gitlab2prov.domain.constants import ProvRole
 from gitlab2prov.domain.objects import (
     AnnotatedVersion,
@@ -34,6 +34,7 @@ from gitlab2prov.domain.objects import (
     GitTag,
     Issue,
     MergeRequest,
+    ProvObject,
     Release,
 )
 
@@ -45,11 +46,16 @@ AUTHOR_ROLE_MAP = {
 
 
 HostedResource = Commit | Issue | MergeRequest
-Query = Callable[[Repository], Iterable[HostedResource]]
+Query = Callable[[InMemoryRepository], Iterable[HostedResource]]
 DEFAULT_NAMESPACE = Namespace("ex", "example.org")
 
 
-def file_status_query(repository: Repository, status: str):
+def file_status_query(
+    repository: InMemoryRepository, status: str
+) -> Iterator[
+    tuple[GitCommit | None, GitCommit | None, FileRevision]
+    | tuple[GitCommit | None, GitCommit | None, FileRevision, FileRevision]
+]:
     for revision in repository.list_all(FileRevision, status=status):
         commit = repository.get(GitCommit, sha=revision.commit)
         for parent in [repository.get(GitCommit, sha=sha) for sha in commit.parents]:
@@ -59,7 +65,9 @@ def file_status_query(repository: Repository, status: str):
                 yield commit, parent, revision
 
 
-def hosted_resource_query(repository: Repository, resource_type: Type[HostedResource]):
+def hosted_resource_query(
+    repository: InMemoryRepository, resource_type: Type[HostedResource]
+) -> Iterator[tuple[Commit | Issue | MergeRequest, GitCommit | None]]:
     for resource in repository.list_all(resource_type):
         if resource_type == Commit:
             yield (resource, repository.get(GitCommit, sha=resource.sha))
@@ -79,7 +87,7 @@ class ProvenanceContext:
     document: ProvDocument
     namespace: Optional[str] = None
 
-    def add_element(self, dataclass_instance) -> ProvRecord:
+    def add_element(self, dataclass_instance: ProvObject) -> ProvRecord:
         # Convert the dataclass instance to a ProvElement
         element = self.convert_to_prov_element(dataclass_instance)
         # Add the namespace to the element if it is provided
@@ -88,7 +96,7 @@ class ProvenanceContext:
         # Return the newly added element
         return self.document.add_record(element)
 
-    def convert_to_prov_element(self, dataclass_instance) -> ProvElement:
+    def convert_to_prov_element(self, dataclass_instance: ProvObject) -> ProvElement:
         # Convert the dataclass instance to a ProvElement
         element = dataclass_instance.to_prov_element()
         # Add the element to the ProvDocument and return it
@@ -96,8 +104,8 @@ class ProvenanceContext:
 
     def add_relation(
         self,
-        source_dataclass_instance,
-        target_dataclass_instance,
+        source_dataclass_instance: ProvObject,
+        target_dataclass_instance: ProvObject,
         relationship_type: Type[ProvRelation],
         attributes: dict[str, Any] = None,
     ) -> None:
@@ -440,7 +448,7 @@ class ReleaseModel:
         self.ctx = ProvenanceContext(ProvDocument())
 
     @staticmethod
-    def query(repository: Repository) -> Iterable[tuple[Release, GitTag]]:
+    def query(repository: InMemoryRepository) -> Iterable[tuple[Release, GitTag]]:
         for release in repository.list_all(Release):
             tag = repository.get(GitTag, sha=release.tag_sha)
             yield release, tag
@@ -505,7 +513,7 @@ class GitTagModel:
         self.ctx = ProvenanceContext(ProvDocument())
 
     @staticmethod
-    def query(repository: Repository) -> Iterable[tuple[GitTag, Commit]]:
+    def query(repository: InMemoryRepository) -> Iterable[tuple[GitTag, Commit]]:
         for tag in repository.list_all(GitTag):
             commit = repository.get(Commit, sha=tag.sha)
             yield tag, commit
@@ -562,7 +570,7 @@ class CallableModel:
         # Initialize the document
         self.document = ProvDocument()
 
-    def __call__(self, repository: Repository):
+    def __call__(self, repository: InMemoryRepository) -> ProvDocument:
         # Pass the repository to the query
         for args in self.query(repository):
             # Initialize the model

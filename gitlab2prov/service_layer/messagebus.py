@@ -5,14 +5,14 @@ from typing import Callable
 from prov.model import ProvDocument
 
 from gitlab2prov.domain.commands import Command
-from gitlab2prov.service_layer.unit_of_work import UnitOfWork
+from gitlab2prov.service_layer.unit_of_work import InMemoryUnitOfWork
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class MessageBus:
-    uow: UnitOfWork
+    uow: InMemoryUnitOfWork
     handlers: dict[type[Command], list[Callable]]
 
     def handle(self, command: Command) -> ProvDocument | None:

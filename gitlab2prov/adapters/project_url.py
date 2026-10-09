@@ -34,11 +34,11 @@ class ProjectUrl:
 
 @dataclass
 class GitlabProjectUrl(ProjectUrl):
-    def clone_url(self, token: str = ""):
+    def clone_url(self, token: str = "") -> str:
         return super().clone_url("gitlab", token)
 
 
 @dataclass
 class GithubProjectUrl(ProjectUrl):
-    def clone_url(self, token: str = ""):
+    def clone_url(self, token: str = "") -> str:
         return super().clone_url("github", token)

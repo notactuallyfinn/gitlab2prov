@@ -14,6 +14,7 @@ from prov.model import (
     ProvAgent,
     ProvDocument,
     ProvEntity,
+    ProvRecord,
 )
 
 from gitlab2prov.domain.constants import ProvType
@@ -24,7 +25,13 @@ PLACEHOLDER.set_default_namespace("http://github.com/dlr-sc/gitlab2prov/")
 
 
 @dataclass
-class User:
+class ProvObject:
+    def to_prov_element(self) -> ProvRecord:
+        raise NotImplementedError("Implement in subclass")
+
+
+@dataclass
+class User(ProvObject):
     # TODO: github_email, gitlab_email
     name: str
     email: str
@@ -60,7 +67,7 @@ class User:
 
 
 @dataclass
-class File:
+class File(ProvObject):
     name: str
     path: str
     commit: str
@@ -117,7 +124,7 @@ class FileRevision(File):
 
 
 @dataclass
-class Annotation:
+class Annotation(ProvObject):
     id: str
     name: str
     body: str
@@ -144,7 +151,7 @@ class Annotation:
 
 
 @dataclass
-class Version:
+class Version(ProvObject):
     id: str
     resource: str  # ProvType
 
@@ -170,7 +177,7 @@ class Version:
 
 
 @dataclass
-class AnnotatedVersion:
+class AnnotatedVersion(ProvObject):
     id: str
     annotation: str  # Annotation.id
     resource: str  # ProvType
@@ -212,7 +219,7 @@ class AnnotatedVersion:
 
 
 @dataclass
-class Creation:
+class Creation(ProvObject):
     id: str
     resource: str
     start: datetime
@@ -259,7 +266,7 @@ class Creation:
 
 
 @dataclass
-class GitCommit:
+class GitCommit(ProvObject):
     sha: str  # commit sha
     title: str  # commit title
     message: str  # commit message
@@ -296,7 +303,7 @@ class GitCommit:
 
 
 @dataclass
-class Issue:
+class Issue(ProvObject):
     id: str
     iid: str
     platform: str
@@ -340,7 +347,7 @@ class Issue:
 
 
 @dataclass
-class Commit:
+class Commit(ProvObject):
     sha: str
     url: str
     author: User
@@ -378,7 +385,7 @@ class Commit:
 
 
 @dataclass
-class MergeRequest:
+class MergeRequest(ProvObject):
     id: str
     iid: str
     title: str
@@ -432,7 +439,7 @@ class MergeRequest:
 
 
 @dataclass
-class GitTag:
+class GitTag(ProvObject):
     name: str
     sha: str
     message: str | None
@@ -462,7 +469,7 @@ class GitTag:
 
 
 @dataclass
-class Asset:
+class Asset(ProvObject):
     url: str
     format: str
 
@@ -480,7 +487,7 @@ class Asset:
 
 
 @dataclass
-class Evidence:
+class Evidence(ProvObject):
     sha: str
     url: str
     collected_at: datetime
@@ -500,7 +507,7 @@ class Evidence:
 
 
 @dataclass
-class Release:
+class Release(ProvObject):
     name: str
     body: str
     tag_name: str

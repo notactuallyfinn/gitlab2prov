@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Self
 
 import jsonschema
 import jsonschema.exceptions
@@ -21,7 +21,7 @@ class Config:
         self.schema = self.get_schema()
 
     @classmethod
-    def read(cls, filepath: str):
+    def read(cls, filepath: str) -> Self:
         """Read the config file from the given path."""
         with open(filepath, "rt") as f:
             yaml = YAML(typ="safe")
