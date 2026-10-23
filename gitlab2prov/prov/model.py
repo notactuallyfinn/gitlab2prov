@@ -5,7 +5,7 @@ from typing import Any, Callable, Iterable, Iterator, Optional, Type, Union
 
 from prov.identifier import Namespace, QualifiedName
 from prov.model import (
-    PROV_ATTR_STARTTIME,
+    PROV_ATTR_TIME,
     PROV_ROLE,
     ProvAssociation,
     ProvAttribution,
@@ -42,6 +42,26 @@ AUTHOR_ROLE_MAP = {
     Commit: ProvRole.COMMIT_AUTHOR,
     Issue: ProvRole.ISSUE_AUTHOR,
     MergeRequest: ProvRole.MERGE_REQUEST_AUTHOR,
+}
+RESOURCE_TYPE_ROLE_MAP = {
+    Commit: ProvRole.COMMIT,
+    Issue: ProvRole.ISSUE,
+    MergeRequest: ProvRole.MERGE_REQUEST,
+}
+FIRST_RESOURCE_VERSION_TYPE_ROLE_MAP = {
+    Commit: ProvRole.COMMIT_VERSION_AT_POINT_OF_CREATION,
+    Issue: ProvRole.ISSUE_VERSION_AT_POINT_OF_CREATION,
+    MergeRequest: ProvRole.MERGE_REQUEST_VERSION_AT_POINT_OF_CREATION,
+}
+PRE_ANNOTATION_VERSION_ROLE_MAP = {
+    Commit: ProvRole.PRE_ANNOTATION_COMMIT_VERSION,
+    Issue: ProvRole.PRE_ANNOTATION_ISSUE_VERSION,
+    MergeRequest: ProvRole.PRE_ANNOTATION_MERGE_REQUEST_VERSION,
+}
+POST_ANNOTATION_VERSION_ROLE_MAP = {
+    Commit: ProvRole.POST_ANNOTATION_COMMIT_VERSION,
+    Issue: ProvRole.POST_ANNOTATION_ISSUE_VERSION,
+    MergeRequest: ProvRole.POST_ANNOTATION_MERGE_REQUEST_VERSION,
 }
 
 
@@ -172,22 +192,15 @@ class FileAdditionModel:
             self.revision,
             self.commit,
             ProvGeneration,
-            {
-                PROV_ATTR_STARTTIME: self.commit.authored_at,
-                PROV_ROLE: ProvRole.FILE,
-                "insertions": self.revision.insertions,
-                "deletions": self.revision.deletions,
-                "lines": self.revision.lines,
-                "score": self.revision.score,
-            },
+            {PROV_ATTR_TIME: self.commit.authored_at, PROV_ROLE: ProvRole.FILE_REVISION_AT_POINT_OF_ADDITION},
         )
         self.ctx.add_relation(
             self.revision.file,
             self.commit,
             ProvGeneration,
             {
-                PROV_ATTR_STARTTIME: self.commit.authored_at,
-                PROV_ROLE: ProvRole.ADDED_REVISION,
+                PROV_ATTR_TIME: self.commit.authored_at,
+                PROV_ROLE: ProvRole.FILE,
             },
         )
         self.ctx.add_relation(self.revision.file, self.commit.author, ProvAttribution)
@@ -228,7 +241,7 @@ class FileDeletionModel:
             self.revision,
             self.commit,
             ProvInvalidation,
-            {PROV_ATTR_STARTTIME: self.commit.authored_at, PROV_ROLE: ProvRole.DELETED_REVISION},
+            {PROV_ATTR_TIME: self.commit.authored_at, PROV_ROLE: ProvRole.FILE_REVISION_AT_POINT_OF_DELETION},
         )
         # Return the document
         return self.ctx.document
@@ -268,7 +281,7 @@ class FileModificationModel:
             self.revision,
             self.commit,
             ProvGeneration,
-            {PROV_ATTR_STARTTIME: self.commit.authored_at, PROV_ROLE: ProvRole.MODIFIED_REVISION},
+            {PROV_ATTR_TIME: self.commit.authored_at, PROV_ROLE: ProvRole.FILE_REVISION_AFTER_MODIFICATION},
         )
         self.ctx.add_relation(self.revision, self.commit.author, ProvAttribution)
         self.ctx.add_relation(
@@ -278,7 +291,7 @@ class FileModificationModel:
             self.commit,
             self.previous,
             ProvUsage,
-            {PROV_ATTR_STARTTIME: self.commit.authored_at, PROV_ROLE: ProvRole.PREVIOUS_REVISION},
+            {PROV_ATTR_TIME: self.commit.authored_at, PROV_ROLE: ProvRole.FILE_REVISION_BEFORE_MODIFICATION},
         )
         # Return the document
         return self.ctx.document
@@ -330,7 +343,6 @@ class HostedResourceModel:
         self.ctx.add_element(self.resource.first_version)
         self.ctx.add_element(self.resource.author)
         self.ctx.add_element(self.commit)
-        self.ctx.add_element(self.commit.committer)
         # Add the relations to the context
         self.ctx.add_relation(
             self.resource.creation,
@@ -345,24 +357,18 @@ class HostedResourceModel:
             self.resource,
             self.resource.creation,
             ProvGeneration,
-            {PROV_ATTR_STARTTIME: self.resource.creation.start, PROV_ROLE: ProvRole.RESOURCE},
+            {PROV_ATTR_TIME: self.resource.creation.start, PROV_ROLE: ProvRole.COMMIT_CREATION},
         )
         self.ctx.add_relation(
             self.resource.first_version,
             self.resource.creation,
             ProvGeneration,
             {
-                PROV_ATTR_STARTTIME: self.resource.creation.start,
-                PROV_ROLE: ProvRole.FIRST_RESOURCE_VERSION,
+                PROV_ATTR_TIME: self.resource.creation.start,
+                PROV_ROLE: ProvRole.COMMIT_VERSION_AT_POINT_OF_CREATION,
             },
         )
         self.ctx.add_relation(self.resource.creation, self.commit, ProvCommunication)
-        self.ctx.add_relation(
-            self.commit,
-            self.commit.committer,
-            ProvAssociation,
-            {PROV_ROLE: ProvRole.COMMIT_AUTHOR},
-        )
 
     def _add_creation_part(self):
         self.ctx.add_element(self.resource)
@@ -383,15 +389,15 @@ class HostedResourceModel:
             self.resource,
             self.resource.creation,
             ProvGeneration,
-            {PROV_ATTR_STARTTIME: self.resource.creation.start, PROV_ROLE: ProvRole.RESOURCE},
+            {PROV_ATTR_TIME: self.resource.creation.start, PROV_ROLE: RESOURCE_TYPE_ROLE_MAP[type(self.resource)]},
         )
         self.ctx.add_relation(
             self.resource.first_version,
             self.resource.creation,
             ProvGeneration,
             {
-                PROV_ATTR_STARTTIME: self.resource.creation.start,
-                PROV_ROLE: ProvRole.FIRST_RESOURCE_VERSION,
+                PROV_ATTR_TIME: self.resource.creation.start,
+                PROV_ROLE: FIRST_RESOURCE_VERSION_TYPE_ROLE_MAP[type(self.resource)],
             },
         )
 
@@ -425,8 +431,8 @@ class HostedResourceModel:
             previous_version,
             ProvUsage,
             {
-                PROV_ATTR_STARTTIME: current_annotation.start,
-                PROV_ROLE: ProvRole.PRE_ANNOTATION_VERSION,
+                PROV_ATTR_TIME: current_annotation.start,
+                PROV_ROLE: PRE_ANNOTATION_VERSION_ROLE_MAP[type(self.resource)],
             },
         )
         self.ctx.add_relation(
@@ -434,8 +440,8 @@ class HostedResourceModel:
             current_annotation,
             ProvGeneration,
             {
-                PROV_ATTR_STARTTIME: current_annotation.start,
-                PROV_ROLE: ProvRole.POST_ANNOTATION_VERSION,
+                PROV_ATTR_TIME: current_annotation.start,
+                PROV_ROLE: POST_ANNOTATION_VERSION_ROLE_MAP[type(self.resource)],
             },
         )
 
@@ -452,7 +458,7 @@ class ReleaseModel:
     @staticmethod
     def query(repository: InMemoryRepository) -> Iterable[tuple[Release, GitTag]]:
         for release in repository.list_all(Release):
-            tag = repository.get(GitTag, sha=release.tag_sha)
+            tag = repository.get(GitTag, name=release.tag_name)
             yield release, tag
 
     def build_provenance_model(self) -> ProvDocument:
@@ -476,7 +482,7 @@ class ReleaseModel:
             self.release,
             self.release.creation,
             ProvGeneration,
-            {PROV_ATTR_STARTTIME: self.release.creation.start, PROV_ROLE: ProvRole.RELEASE},
+            {PROV_ATTR_TIME: self.release.creation.start, PROV_ROLE: ProvRole.RELEASE},
         )
         self.ctx.add_relation(
             self.release.creation,
@@ -498,7 +504,7 @@ class ReleaseModel:
             self.tag,
             self.tag.creation,
             ProvGeneration,
-            {PROV_ATTR_STARTTIME: self.tag.creation.start, PROV_ROLE: ProvRole.TAG},
+            {PROV_ATTR_TIME: self.tag.creation.start, PROV_ROLE: ProvRole.TAG},
         )
         self.ctx.add_relation(self.tag.creation, self.tag.author, ProvAssociation, {PROV_ROLE: ProvRole.TAG_AUTHOR})
 
@@ -535,7 +541,7 @@ class GitTagModel:
             self.tag,
             self.tag.creation,
             ProvGeneration,
-            {PROV_ATTR_STARTTIME: self.tag.creation.start, PROV_ROLE: ProvRole.TAG},
+            {PROV_ATTR_TIME: self.tag.creation.start, PROV_ROLE: ProvRole.TAG},
         )
         self.ctx.add_relation(self.tag, self.tag.author, ProvAttribution)
         self.ctx.add_relation(self.tag.creation, self.tag.author, ProvAssociation, {PROV_ROLE: ProvRole.TAG_AUTHOR})
@@ -546,7 +552,7 @@ class GitTagModel:
                 self.commit,
                 self.commit.creation,
                 ProvGeneration,
-                {PROV_ATTR_STARTTIME: self.commit.creation.start, PROV_ROLE: ProvRole.COMMIT},
+                {PROV_ATTR_TIME: self.commit.creation.start, PROV_ROLE: ProvRole.COMMIT},
             )
             self.ctx.add_relation(self.commit, self.commit.author, ProvAttribution)
             self.ctx.add_relation(

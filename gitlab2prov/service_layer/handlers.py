@@ -73,7 +73,10 @@ def combine(cmd: Combine) -> ProvDocument:
 
 def write_file(cmd: Write) -> None:
     log.info(f"write {cmd=}")
-    ops.write_provenance_file(cmd.document, cmd.filename, cmd.format)
+    if cmd.filename != "-":
+        ops.write_provenance_file(cmd.document, cmd.filename, cmd.format)
+    else:
+        ops.print_provenance(cmd.document, cmd.format)
 
 
 def read_file(cmd: Read) -> ProvDocument:

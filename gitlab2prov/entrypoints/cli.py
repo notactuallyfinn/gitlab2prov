@@ -1,5 +1,6 @@
 from functools import partial, update_wrapper, wraps
-from typing import Iterator, NoReturn
+from pathlib import Path
+from typing import Iterator, Literal, NoReturn
 
 import click
 from git import Git
@@ -242,11 +243,7 @@ def extract(bus: MessageBus, urls: list[str], token: str) -> Iterator[ProvDocume
     for url in urls:
         bus.handle(Fetch(url, token))
         doc = bus.handle(Serialize(url))
-        with open("temp1.txt", "w") as file:
-            file.write(str(doc.serialize()))
         doc = bus.handle(Transform(doc))
-        with open("temp2.txt", "w") as file:
-            file.write(str(doc.serialize()))
         if not document:
             document = doc
         else:
@@ -298,6 +295,7 @@ def read(bus: MessageBus, filenames: list[str]) -> Iterator[ProvDocument]:
     "--output",
     "destination",
     default="-",
+    type=str,
     help="Output file path.",
 )
 @processor
@@ -316,11 +314,11 @@ def write(
 
     for i, document in enumerate(documents, start=1):
         for fmt in formats:
-            filename = f"{destination}{'-' + str(i) if len(documents) > 1 else ''}.{fmt}"
+            filename = f"{destination}{'-' + str(i) if len(documents) > 1 else ''}.{fmt}" if destination != "-" else "-"
             try:
                 bus.handle(Write(document, filename, fmt))
             except Exception as exc:
-                click.echo(f"Could not save {document.description}: {exc}", err=True)
+                click.echo(f"Could not write {document.description}: {exc}", err=True)
 
             yield document
 

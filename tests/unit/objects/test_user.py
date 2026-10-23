@@ -1,3 +1,5 @@
+from prov.identifier import QualifiedName
+
 from gitlab2prov.domain.constants import ProvType
 from gitlab2prov.domain.objects import User
 
@@ -45,15 +47,15 @@ class TestUser:
     def test_user_identifier(self):
         # Test identifier property
         user = User(name="John Doe", email="johndoe@example.com")
-        assert user.identifier.localpart == "User?name=John Doe&email=johndoe@example.com"
+        assert user.identifier.localpart == "User?name=John+Doe&email=johndoe%40example.com"
 
     def test_user_to_prov_element(self):
         # Test to_prov_element() method with minimum attributes
         user = User(name="John Doe", email="johndoe@example.com")
         prov_element = user.to_prov_element()
-        assert prov_element.identifier.localpart == "User?name=John Doe&email=johndoe@example.com"
+        assert prov_element.identifier.localpart == "User?name=John+Doe&email=johndoe%40example.com"
         assert sorted(
-            [(name.localpart, val) for name, val in prov_element.attributes],
+            [(name.localpart, val) for name, val in prov_element.attributes if name.localpart != "label"],
             key=lambda node: node[0],
         ) == [
             ("email", "johndoe@example.com"),
@@ -72,9 +74,9 @@ class TestUser:
             prov_role="developer",
         )
         prov_element = user.to_prov_element()
-        assert prov_element.identifier.localpart == "User?name=Jane Smith&email=janesmith@example.com"
+        assert prov_element.identifier.localpart == "User?name=Jane+Smith&email=janesmith%40example.com"
         assert sorted(
-            [(name.localpart, val) for name, val in prov_element.attributes],
+            [(name.localpart, val) for name, val in prov_element.attributes if name.localpart != "label"],
             key=lambda node: node[0],
         ) == [
             ("email", "janesmith@example.com"),

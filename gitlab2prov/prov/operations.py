@@ -66,6 +66,11 @@ def write_provenance_file(document: ProvDocument, filename: str, format: str = "
         raise FileExistsError(f"File {filename} already exists.")
 
 
+def print_provenance(document: ProvDocument, format: str = "json") -> None:
+    """Write a ProvDocument to the console."""
+    print(serialize_string(document, format=format))
+
+
 def serialize_string(document: ProvDocument, format: str = "json") -> str:
     """Serialize a ProvDocument to a string."""
     if format not in SERIALIZATION_FORMATS:
